@@ -1,0 +1,169 @@
+{
+  "_aide": [
+    "C'est le SEUL fichier à modifier pour changer le contenu du portfolio (version 3D et version simple).",
+    "Modifie uniquement les textes entre guillemets. Tout ce qui est entre [crochets] est à compléter.",
+    "Ajouter une section : copie un bloc complet de 'sections' (de { à }), colle-le, change son 'id'. Retirer : supprime le bloc (ou ajoute \"masquer\": true).",
+    "Chaque élément : { \"texte\": obligatoire, \"detail\": phrase affichée en aperçu, \"lien\": adresse ouverte au clic, \"page\": sous-page (voir Projets) }.",
+    "Sous-page : \"page\": { \"titre\", \"texte\" (liste de paragraphes), \"image\": \"assets/images/fichier.jpg\", \"lien\": { \"texte\", \"url\" } }. Tout est facultatif.",
+    "Bouton de section : \"action\" = \"lien\" (avec \"cible\": adresse), \"cv\" (ouvre le PDF), \"email\" (ouvre la messagerie) ou \"section\" (avec \"cible\": id d'une section).",
+    "Icônes disponibles : user, route, school, briefcase, folder, star, file, mail, code, chart, trophy, heart, globe, link, book, gamepad, phone, bulb.",
+    "Photo de profil (facultatif) : mets le chemin d'une image carrée dans profil.photo, ex. \"assets/images/photo.jpg\" ; sinon tes initiales s'affichent.",
+    "reglages.son : true = sons d'interface activés par défaut (le visiteur peut les couper).",
+    "Attention aux virgules : il en faut une entre deux éléments, mais jamais après le dernier d'une liste."
+  ],
+
+  "profil": {
+    "nom": "Ethan Tosic",
+    "titre": "Étudiant en Bachelor AI Applied to Business · Eugenia School",
+    "accroche": "Une base solide en maths, la pratique de l'IA générative et de Python, et 7 étés d'expérience terrain en vente et en gestion de restaurant.",
+    "recherche": "Alternance en IA, data ou automatisation · à partir de septembre 2027",
+    "localisation": "Saint-Maur-des-Fossés (94), Île-de-France",
+    "email": "tosicethan04@gmail.com",
+    "telephone": "06 51 61 92 93",
+    "afficherTelephone": false,
+    "liens": {
+      "linkedin": "https://www.linkedin.com/in/ethan-tosic",
+      "github": ""
+    },
+    "cv": "assets/cv.pdf",
+    "photo": "",
+    "permis": "Permis B",
+    "langues": ["Français · langue maternelle", "Anglais · B2", "Espagnol · B1"],
+    "centresInteret": ["Tennis", "Cuisine", "Backgammon", "Cinéma", "Voyages"]
+  },
+
+  "reglages": {
+    "vignettesVisibles": 6,
+    "sectionDepart": "apropos",
+    "son": true
+  },
+
+  "sections": [
+    {
+      "id": "apropos",
+      "label": "À propos",
+      "titre": "Ethan Tosic",
+      "sousTitre": "Bachelor AI Applied to Business · Eugenia School",
+      "icone": "user",
+      "couleurs": ["#3d8bff", "#7c5cff"],
+      "elements": [
+        { "texte": "Étudiant en 2e année de Bachelor AI Applied to Business", "detail": "Après une prépa ingénieur à l'EIGSI et une licence de mathématiques" },
+        { "texte": "Je recherche une alternance en IA, data ou automatisation", "detail": "À partir de septembre 2027" },
+        { "texte": "Maths, IA générative, Python… et 7 étés sur le terrain", "detail": "Vente chez adidas et Levi's, gérant suppléant de restaurant" },
+        { "texte": "En dehors des cours", "detail": "Tennis · Cuisine · Backgammon · Cinéma · Voyages" }
+      ],
+      "bouton": { "texte": "Me contacter", "action": "section", "cible": "contact" }
+    },
+    {
+      "id": "parcours",
+      "label": "Formation",
+      "titre": "Formation",
+      "sousTitre": "Des maths vers l'IA appliquée au business",
+      "icone": "school",
+      "couleurs": ["#00a3a3", "#3d8bff"],
+      "elements": [
+        { "texte": "Bachelor AI Applied to Business · 2026 – 2028", "detail": "Eugenia School, Paris · 2e année en cours · IA générative, agents IA, Python, Power BI, business plan, entrepreneuriat" },
+        { "texte": "Licence de mathématiques · 2024 – 2026", "detail": "La Rochelle Université · Algèbre linéaire, probabilités, analyse numérique" },
+        { "texte": "Cycle préparatoire intégré ingénieur · 2022 – 2024", "detail": "EIGSI, La Rochelle · Projets de groupe d'envergure" },
+        { "texte": "Baccalauréat général · 2022", "detail": "Lycée Marcelin Berthelot, Saint-Maur · Spécialités Maths et Physique-Chimie" }
+      ],
+      "bouton": { "texte": "Voir mon CV", "action": "cv" }
+    },
+    {
+      "id": "experiences",
+      "label": "Expériences",
+      "titre": "Expériences",
+      "sousTitre": "7 étés sur le terrain",
+      "icone": "briefcase",
+      "couleurs": ["#ff9f1c", "#ff5e5b"],
+      "elements": [
+        { "texte": "Conseiller de vente · Levi's · Été 2026", "detail": "Bercy Village, Paris · CDD · Conseil et vente auprès d'une clientèle variée dans un centre commercial très fréquenté ; mise en valeur des collections, gestion des stocks et encaissement" },
+        { "texte": "Gérant suppléant · BCHEF · Étés 2025 – 2026", "detail": "Restaurant, Bobigny · Temps plein en 2025, temps partiel en 2026 · Remplacement complet du gérant : direction d'une équipe de 6 personnes et gestion des plannings ; commandes fournisseurs, stocks, caisse et suivi du chiffre d'affaires ; service et relation client" },
+        { "texte": "Conseiller de vente · adidas · Étés 2020 – 2024", "detail": "Île-de-France · 5 CDD saisonniers consécutifs, rappelé chaque été (Créteil Soleil, Beaugrenelle, Aéroville) · Accueil, conseil et vente, gestion des stocks et mise en rayon" },
+        { "texte": "Bénévole · Atelier européen du lycée · 2021 – 2022", "detail": "Collecte pour l'Ukraine (nourriture, vêtements, produits de première nécessité) envoyée par avion cargo ; travail de mémoire sur la Shoah" }
+      ],
+      "bouton": { "texte": "Voir mon CV", "action": "cv" }
+    },
+    {
+      "id": "projets",
+      "label": "Projets",
+      "titre": "Projets",
+      "sousTitre": "Ce que je construis",
+      "icone": "folder",
+      "couleurs": ["#ff7a45", "#ff3d77"],
+      "elements": [
+        {
+          "texte": "Portfolio 3D interactif",
+          "detail": "Ce site : un salon en 3D (Three.js) où le portfolio s'affiche sur la télé, façon menu de console. Contenu modifiable via un simple fichier JSON.",
+          "page": {
+            "titre": "Portfolio 3D interactif",
+            "texte": [
+              "Un salon modélisé en 3D dans le navigateur avec Three.js : mon avatar joue à la console, et tout le portfolio s'affiche sur la télé comme un menu de jeu.",
+              "Le contenu (sections, textes, liens) est lu dans un seul fichier JSON : je peux le mettre à jour sans toucher au code. Une version simple et accessible est générée à partir du même fichier.",
+              "Points techniques : avatar articulé posé par cinématique inverse, menu dessiné sur un canvas utilisé comme texture, occlusion ambiante, qualité adaptée automatiquement à l'appareil.",
+              "[À COMPLÉTER : ce que tu as appris, temps passé, outils d'IA utilisés]"
+            ],
+            "lien": { "texte": "Voir la version simple", "url": "simple.html" }
+          }
+        },
+        {
+          "texte": "Serveur MCP · projet de groupe",
+          "detail": "Création en équipe d'un serveur MCP (Model Context Protocol) qui connecte une IA à des outils utiles au quotidien. [Ton rôle et le résultat]",
+          "page": {
+            "texte": [
+              "[À COMPLÉTER : le problème de départ, ce que fait le serveur, les outils connectés.]",
+              "[À COMPLÉTER : ton rôle dans l'équipe, les technologies (Python…), le résultat.]"
+            ]
+          }
+        },
+        { "texte": "Hackathon Artefact · Adopt AI", "detail": "Novembre 2026 · [Sujet, équipe et résultat — à retirer si tu n'y participes pas]" },
+        { "texte": "Business plan · Workshop Data", "detail": "Eugenia School · Modèle économique et projection financière de [nom du projet]" }
+      ],
+      "bouton": { "texte": "Voir mon LinkedIn", "action": "lien", "cible": "https://www.linkedin.com/in/ethan-tosic" }
+    },
+    {
+      "id": "competences",
+      "label": "Compétences",
+      "titre": "Compétences",
+      "sousTitre": "Mes outils et savoir-faire",
+      "icone": "star",
+      "couleurs": ["#f5b400", "#ff7a45"],
+      "elements": [
+        { "texte": "IA et data", "detail": "IA générative · Agents IA · Automatisation et no-code" },
+        { "texte": "Outils data et IA", "detail": "Python · SQL · Excel · Power BI · Databricks · Jupyter / Colab · Dust · ChatGPT, Claude, Mistral" },
+        { "texte": "Bureautique et collaboration", "detail": "Google Workspace · Microsoft Office · Notion · Canva / Figma · GitHub / VS Code" },
+        { "texte": "Business", "detail": "Gestion de projet · Business plan · Entrepreneuriat" },
+        { "texte": "Terrain", "detail": "Vente et relation client · Management d'équipe · Gestion des stocks · Logiciels de caisse" },
+        { "texte": "Langues", "detail": "Français (langue maternelle) · Anglais B2 · Espagnol B1" }
+      ],
+      "bouton": { "texte": "Me contacter", "action": "section", "cible": "contact" }
+    },
+    {
+      "id": "cv",
+      "label": "CV",
+      "titre": "Mon CV",
+      "sousTitre": "La version complète, toujours à jour",
+      "icone": "file",
+      "couleurs": ["#7c5cff", "#c04dff"],
+      "elements": [
+        { "texte": "Format PDF · une page" },
+        { "texte": "Alternance en IA, data ou automatisation · septembre 2027" }
+      ],
+      "bouton": { "texte": "Télécharger le CV", "action": "cv" }
+    },
+    {
+      "id": "contact",
+      "label": "Contact",
+      "titre": "Contact",
+      "sousTitre": "Écris-moi, je réponds vite",
+      "icone": "mail",
+      "couleurs": ["#2ad49a", "#00a3a3"],
+      "elements": [
+        { "texte": "tosicethan04@gmail.com", "lien": "mailto:tosicethan04@gmail.com" },
+        { "texte": "linkedin.com/in/ethan-tosic", "lien": "https://www.linkedin.com/in/ethan-tosic" },
+        { "texte": "Saint-Maur-des-Fossés (94) · Permis B" }
+      ],
+      "bouton": { "texte": "Envoyer un email", "action": "email" }
+    }
+  ]
+}

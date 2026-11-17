@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ethan Tosic · Portfolio</title>
+<meta name="description" content="Portfolio d'Ethan Tosic, étudiant en Bachelor AI Applied to Business à Eugenia School. Recherche une alternance en IA, data ou automatisation à partir de septembre 2027.">
+<meta property="og:title" content="Ethan Tosic · Portfolio">
+<meta property="og:description" content="Étudiant en Bachelor AI Applied to Business · Eugenia School. Recherche une alternance en IA, data ou automatisation.">
+<meta property="og:image" content="https://ethan-tosic.vercel.app/assets/images/apercu.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0c10">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Ccircle cx=%2232%22 cy=%2232%22 r=%2230%22 fill=%22%233d8bff%22/%3E%3Ctext x=%2232%22 y=%2241%22 font-family=%22Arial%22 font-weight=%22700%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22%3EET%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1c; --card: #121933; --card2: #182246; --text: #eef2ff; --muted: #b6c2e2; --line: rgba(255,255,255,.12);
+    --accent: #3d8bff; --radius: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: radial-gradient(1200px 600px at 85% -10%, rgba(61,139,255,.25), transparent 60%), var(--bg); color: var(--text); font: 400 17px/1.6 Inter, system-ui, -apple-system, Segoe UI, sans-serif; }
+  a { color: #9db8ff; }
+  :focus-visible { outline: 3px solid #9db8ff; outline-offset: 3px; border-radius: 6px; }
+  .skip { position: absolute; left: -999px; top: 8px; background: #fff; color: #07122b; padding: 8px 14px; border-radius: 8px; z-index: 10; }
+  .skip:focus { left: 8px; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+
+  header.wrap { padding-top: 48px; padding-bottom: 28px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 40px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  .logo .ini { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+  h1 { font-size: clamp(36px, 7vw, 60px); line-height: 1.05; margin: 0 0 10px; font-weight: 800; letter-spacing: -.02em; }
+  .titre { font-size: 20px; color: var(--muted); margin: 0 0 18px; }
+  .accroche { font-size: 18px; max-width: 680px; margin: 0 0 18px; }
+  .badge { display: inline-flex; gap: 8px; align-items: center; background: rgba(42,212,154,.14); border: 1px solid rgba(42,212,154,.4); color: #b8f5df; padding: 7px 14px; border-radius: 999px; font-size: 15px; font-weight: 500; }
+  .badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2ad49a; }
+  .loc { color: var(--muted); font-size: 15px; margin: 14px 0 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: var(--text); text-decoration: none; font-weight: 600; font-size: 15px; }
+  .btn:hover { background: rgba(255,255,255,.12); }
+  .btn.primary { background: #fff; color: #07122b; border-color: #fff; }
+  .btn svg { width: 18px; height: 18px; }
+
+  .hero3d { position: relative; display: block; margin-top: 34px; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.45); text-decoration: none; color: var(--text); }
+  .hero3d img { display: block; width: 100%; height: auto; aspect-ratio: 1200 / 630; object-fit: cover; transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+  a.hero3d:hover img { transform: scale(1.03); }
+  .hero3d span { position: absolute; left: 20px; bottom: 20px; display: inline-flex; gap: 10px; align-items: center; padding: 12px 20px; border-radius: 999px; background: rgba(255,255,255,.94); color: #07122b; font-weight: 700; font-size: 15px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .hero3d span::before { content: ""; width: 0; height: 0; border-left: 10px solid #3d8bff; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+  .hero3d.static span { display: none; }
+  .logo .ini img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .credits { font-size: 12px; color: var(--muted); }
+  .credits summary { color: var(--muted); font-weight: 500; font-size: 13px; }
+  .credits p { margin: 8px 0 0; }
+  nav.sections { position: sticky; top: 0; z-index: 5; background: rgba(11,15,28,.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  nav.sections ul { list-style: none; display: flex; gap: 6px; margin: 0 auto; padding: 10px 22px; overflow-x: auto; max-width: 920px; scrollbar-width: none; }
+  nav.sections a { display: block; white-space: nowrap; padding: 7px 14px; border-radius: 999px; text-decoration: none; color: var(--muted); font-size: 15px; font-weight: 500; }
+  nav.sections a:hover { color: var(--text); background: rgba(255,255,255,.08); }
+
+  main section { padding: 44px 0 8px; scroll-margin-top: 64px; }
+  .sec-head { display: flex; gap: 16px; align-items: center; margin-bottom: 18px; }
+  .sec-icon { flex: none; width: 54px; height: 54px; border-radius: 15px; display: grid; place-items: center; }
+  .sec-icon svg { width: 28px; height: 28px; }
+  h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.01em; }
+  .sous { margin: 2px 0 0; color: var(--muted); font-size: 16px; }
+  ul.items { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  ul.items li { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; }
+  .item-t { font-weight: 600; margin: 0; }
+  .item-d { margin: 4px 0 0; color: var(--muted); font-size: 16px; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: #9db8ff; font-weight: 600; font-size: 15px; }
+  details p { margin: 10px 0 0; }
+  details img { display: block; max-width: 100%; border-radius: 12px; margin-top: 12px; }
+  .sec-btn { margin-top: 16px; }
+
+  footer { margin: 60px 0 40px; padding-top: 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+  .error { background: #2a1520; border: 1px solid #6a2a40; border-radius: 14px; padding: 18px 22px; margin: 40px 0; }
+  @media print {
+    body { background: #fff; color: #000; } nav.sections, .actions, .top a, footer a.btn { display: none; }
+    ul.items li { border-color: #ccc; background: #fff; } .item-d, .sous, .titre { color: #333; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="wrap" id="entete">
+  <div class="top">
+    <div class="logo"><span class="ini" id="initiales" aria-hidden="true">ET</span><span id="logoName">Ethan Tosic</span></div>
+    <a class="btn" id="link3d" href="index.html" hidden>Version 3D</a>
+  </div>
+  <h1 id="nom">Ethan Tosic</h1>
+  <p class="titre" id="titre">Étudiant en Bachelor AI Applied to Business · Eugenia School</p>
+  <p class="accroche" id="accroche"></p>
+  <p><span class="badge" id="recherche">Alternance en IA, data ou automatisation · à partir de septembre 2027</span></p>
+  <p class="loc" id="loc"></p>
+  <div class="actions" id="actions"></div>
+  <a class="hero3d static" id="hero3d"><img src="assets/images/apercu.jpg" alt="Aperçu de la version 3D : un salon où le portfolio s'affiche sur la télé, façon menu de console" width="1200" height="630"><span>Découvrir la version 3D</span></a>
+</header>
+
+<nav class="sections" aria-label="Sections"><ul id="nav"></ul></nav>
+
+<main class="wrap" id="contenu" tabindex="-1">
+  <noscript>
+    <p>Ethan Tosic — étudiant en Bachelor AI Applied to Business à Eugenia School. Contact : <a href="mailto:tosicethan04@gmail.com">tosicethan04@gmail.com</a> · <a href="assets/cv.pdf">CV (PDF)</a></p>
+  </noscript>
+</main>
+
+<footer class="wrap">
+  <span id="copy"></span>
+  <a href="#entete">Haut de page ↑</a>
+  <details class="credits" style="flex-basis:100%">
+    <summary>Crédits 3D</summary>
+    <p>Canapé « Glam Velvet Sofa » © Wayfair (CC BY 4.0) · Plante « Diffuse Transmission Plant » © Darmstadt Graphics Group (CC BY 4.0) · Fauteuil « Sheen Chair » © Wayfair (CC0) — modèles Khronos glTF Sample Assets. Éclairage HDRI Poly Haven (CC0) via pmndrs/assets. Mannequin « X Bot » © Adobe Mixamo. Rendu : Three.js.</p>
+  </details>
+</footer>
+
+<script type="module">
+import { loadContent, hasPage, pageParagraphs, elementLink, resolveAction } from './js/content.js';
+import { iconPath } from './js/icons.js';
+
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, ...children) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v; else if (v != null) n.setAttribute(k, v);
+  }
+  children.flat().forEach(c => c != null && n.append(c));
+  return n;
+};
+const svg = (name, color = 'currentColor') => {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('aria-hidden', 'true');
+  s.setAttribute('fill', 'none'); s.setAttribute('stroke', color); s.setAttribute('stroke-width', '1.8');
+  s.setAttribute('stroke-linecap', 'round'); s.setAttribute('stroke-linejoin', 'round');
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', iconPath(name)); s.append(p);
+  return s;
+};
+const isExternal = url => /^https?:/i.test(url);
+const linkAttrs = url => isExternal(url) ? { href: url, target: '_blank', rel: 'noopener' } : { href: url };
+
+// lien vers la 3D seulement si WebGL est disponible
+try {
+  const c = document.createElement('canvas');
+  if (!new URLSearchParams(location.search).has('raison') && (c.getContext('webgl2') || c.getContext('webgl'))) {
+    $('link3d').hidden = false;
+    $('hero3d').href = 'index.html'; $('hero3d').classList.remove('static');
+  }
+} catch {}
+
+try {
+  const { profil: P, sections } = await loadContent();
+  document.title = `${P.nom} · Portfolio`;
+  $('nom').textContent = P.nom; $('logoName').textContent = P.nom;
+  $('initiales').textContent = P.nom.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  if (P.photo) { const im = el('img', { src: P.photo, alt: '' }); $('initiales').textContent = ''; $('initiales').append(im); }
+  $('titre').textContent = P.titre;
+  $('accroche').textContent = P.accroche;
+  $('recherche').textContent = P.recherche; $('recherche').parentElement.hidden = !P.recherche;
+  $('loc').textContent = [P.localisation, P.permis, P.telephone].filter(Boolean).join(' · ');
+  $('copy').textContent = `© ${new Date().getFullYear()} ${P.nom}`;
+
+  const actions = $('actions');
+  if (P.email) actions.append(el('a', { class: 'btn primary', href: 'mailto:' + P.email }, svg('mail'), 'Me contacter'));
+  if (P.cv) actions.append(el('a', { class: 'btn', ...linkAttrs(P.cv) }, svg('file'), 'CV (PDF)'));
+  if (P.liens.linkedin) actions.append(el('a', { class: 'btn', ...linkAttrs(P.liens.linkedin) }, svg('link'), 'LinkedIn'));
+  if (P.liens.github) actions.append(el('a', { class: 'btn', ...linkAttrs(P.liens.github) }, svg('code'), 'GitHub'));
+
+  const nav = $('nav'), main = $('contenu');
+  for (const s of sections) {
+    nav.append(el('li', {}, el('a', { href: '#' + s.id, text: s.label })));
+    const items = s.elements.map(e => {
+      const link = elementLink(e);
+      const title = link && !hasPage(e) ? el('a', linkAttrs(link.url), e.texte) : e.texte;
+      const li = el('li', {}, el('p', { class: 'item-t' }, title));
+      if (e.detail) li.append(el('p', { class: 'item-d', text: e.detail }));
+      if (e.page) {
+        const det = el('details', {}, el('summary', { text: 'En savoir plus' }));
+        pageParagraphs(e).forEach(p => det.append(el('p', { text: p })));
+        if (e.page.image) det.append(el('img', { src: e.page.image, alt: e.page.alt || e.page.titre || e.texte, loading: 'lazy' }));
+        if (link) det.append(el('p', {}, el('a', linkAttrs(link.url), link.texte + (isExternal(link.url) ? ' ↗' : ''))));
+        li.append(det);
+      }
+      return li;
+    });
+    const sec = el('section', { id: s.id, 'aria-labelledby': 'h-' + s.id },
+      el('div', { class: 'sec-head' },
+        el('div', { class: 'sec-icon', style: `background:linear-gradient(135deg,${s.couleurs[0]},${s.couleurs[1]})` }, svg(s.icone, '#fff')),
+        el('div', {}, el('h2', { id: 'h-' + s.id, text: s.titre }), s.sousTitre ? el('p', { class: 'sous', text: s.sousTitre }) : null)),
+      el('ul', { class: 'items' }, items));
+    if (s.bouton) {
+      const b = s.bouton;
+      const href = b.action === 'section' ? '#' + b.cible : resolveAction(b, P);
+      if (href) sec.append(el('p', { class: 'sec-btn' }, el('a', { class: 'btn', ...linkAttrs(href) }, b.texte)));
+    }
+    main.append(sec);
+  }
+
+  // données structurées pour le référencement
+  const ld = { '@context': 'https://schema.org', '@type': 'Person', name: P.nom, jobTitle: P.titre, description: P.accroche, email: P.email ? 'mailto:' + P.email : undefined, sameAs: Object.values(P.liens).filter(Boolean) };
+  document.head.append(el('script', { type: 'application/ld+json', text: JSON.stringify(ld) }));
+  if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+} catch (e) {
+  $('contenu').append(el('div', { class: 'error', role: 'alert' }, el('strong', { text: 'Le contenu n\'a pas pu être chargé.' }), el('p', { text: e.message })));
+}
+</script>
+</body>
+</html>
