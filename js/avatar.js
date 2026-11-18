@@ -54,17 +54,24 @@ export const POSE = {
     piedsRotation: 10,     // pointes de pied tournées vers l'extérieur
   },
 
-  // Bras : épaules → bras → avant-bras → mains (orientés automatiquement vers la manette)
+  // Manette : position devant les hanches. Les bras, les mains et les doigts viennent la saisir.
   manette: {
     avant: 0.36,           // distance de la manette devant les hanches
     hauteur: 0.20,         // hauteur de la manette au-dessus des hanches
-    ecartMains: 0.09,      // demi-écart entre les poignets
-    inclinaison: 20,       // manette inclinée vers le visage
+    inclinaison: 12,       // manette inclinée vers le visage (degrés)
+  },
+  // Prise en main : paumes contre les poignées, doigts enroulés dessous, index sur les gâchettes, pouces sur les joysticks
+  prise: {
+    ecartPaume: 0.03,      // distance entre l'axe de la poignée et le centre de la paume
+    versInterieur: 0.3,    // jointures tournées vers le centre de la manette
+    versHaut: 0.5,         // jointures tournées vers le haut
+    paumeHaut: 0.35,       // paume tournée un peu vers le haut
+    doigts: [72, 82, 55],  // majeur, annulaire, auriculaire : flexion par phalange (degrés)
+    index: [45, 55, 40],   // index posé sur la gâchette
+    pouce: [10, 20, 15],   // flexion du pouce, dont le bout vient se poser sur le joystick
   },
   coudes:    { ecart: 0.45, arriere: 0.35 }, // coudes vers l'extérieur / vers l'arrière
   avantBras: { torsion: 0 },                 // rotation des avant-bras sur eux-mêmes
-  mains:     { flexion: -5, versInterieur: 6, torsion: 30 },  // poignets
-  doigts:    { flexion: [35, 50, 30], pouce: [5, 15, 10] },   // flexion par phalange
 
   // Animation procédurale (0 = désactivé, 1 = normal)
   animation: { respiration: 1, tete: 1, pouces: 1, sursauts: true, intervalleSursauts: [5, 12] },
@@ -169,7 +176,7 @@ function findBones(root) {
 //  Outils de rotation en espace monde (indépendants des axes du rig)
 // ---------------------------------------------------------------------
 const _q1 = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _q3 = new THREE.Quaternion();
-const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3(), _d = new THREE.Vector3();
+const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3(), _d = new THREE.Vector3(), _s = new THREE.Vector3();
 const wp = (o, v = new THREE.Vector3()) => o.getWorldPosition(v);
 
 /** Applique une rotation exprimée en espace monde à un os. */
@@ -343,6 +350,11 @@ export class RiggedAvatar {
       } else n = new THREE.Vector3(0, -1, 0);
       this.palmLocal[side] = n.applyQuaternion(hand.getWorldQuaternion(new THREE.Quaternion()).invert());
     }
+    this.paume = {};                    // longueur poignet → jointure du majeur
+    for (const side of ['left', 'right']) {
+      const mid = B[side + 'Middle1'] || B[side + 'Index1'];
+      this.paume[side] = mid ? wp(mid).distanceTo(wp(B[side + 'Hand'])) : 0.09;
+    }
     this.footRest = {};
     for (const side of ['left', 'right']) {
       const foot = B[side + 'Foot'], toe = B[side + 'Toe'];
@@ -398,50 +410,84 @@ export class RiggedAvatar {
       rotateAxis(S('Shoulder'), U, -s * POSE.epaules.avant * DEG);
       rotateAxis(S('Shoulder'), F, s * POSE.epaules.haussement * DEG);
 
-      // --- bras vers la manette ---
-      const Mn = POSE.manette;
-      const center = hips.clone().addScaledVector(F, Mn.avant).addScaledVector(U, Mn.hauteur);
-      const wrist = center.clone().addScaledVector(L, s * Mn.ecartMains).addScaledVector(F, -0.05).addScaledVector(U, -0.015);
+    }
+
+    // --- la manette, puis les mains qui la saisissent ---
+    const M = this.repereManette(hips);
+    const X = new THREE.Vector3(), Y = new THREE.Vector3(), Z = new THREE.Vector3();
+    M.extractBasis(X, Y, Z);
+    const point = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(M);
+    const direction = (x, y, z) => X.clone().multiplyScalar(x).addScaledVector(Y, y).addScaledVector(Z, z).normalize();
+    const Pr = POSE.prise;
+    for (const [side, s] of [['left', 1], ['right', -1]]) {
+      const S = k => B[side + k];
+      // paume contre l'extérieur de la poignée, jointures vers l'avant et le haut
+      const poignee = point(s * 0.058, -0.016, -0.034);
+      const D = direction(-s * Pr.versInterieur, Pr.versHaut, 1);
+      const N = direction(-s, Pr.paumeHaut, 0.15);
+      const paume = poignee.addScaledVector(X, s * Pr.ecartPaume);
+      const poignet = paume.addScaledVector(D, -0.55 * this.paume[side]).addScaledVector(N, -0.012);
       const elbowPole = U.clone().negate().addScaledVector(L, s * POSE.coudes.ecart).addScaledVector(F, -POSE.coudes.arriere);
-      solveTwoBone(S('Arm'), S('ForeArm'), S('Hand'), wrist, elbowPole);
+      solveTwoBone(S('Arm'), S('ForeArm'), S('Hand'), poignet, elbowPole);
       twist(S('ForeArm'), S('Hand'), s * POSE.avantBras.torsion * DEG);
 
-      // --- mains ---
       const hand = S('Hand'), mid = S('Middle1') || S('Index1');
       if (mid) {
-        const fa = wp(hand).sub(wp(S('ForeArm'))).normalize();
-        const dir = fa.applyAxisAngle(U, -s * POSE.mains.versInterieur * DEG).applyAxisAngle(L, POSE.mains.flexion * DEG);
-        aim(hand, mid, dir);
-        twist(hand, mid, s * POSE.mains.torsion * DEG);
+        aim(hand, mid, D);
+        // main tournée sur elle-même pour que la paume regarde la poignée
+        const axe = wp(mid).sub(wp(hand)).normalize();
+        const actuelle = this.palmWorld(side).projectOnPlane(axe).normalize();
+        const voulue = N.clone().projectOnPlane(axe).normalize();
+        rotateAxis(hand, axe, Math.atan2(actuelle.clone().cross(voulue).dot(axe), actuelle.dot(voulue)));
       }
-      // --- doigts ---
+      // doigts enroulés autour de la poignée, index sur la gâchette
       for (const f of ['Index', 'Middle', 'Ring', 'Pinky']) {
+        const flexion = f === 'Index' ? Pr.index : Pr.doigts;
         for (let i = 1; i <= 3; i++) {
           const b = S(f + i), c = i < 3 ? S(f + (i + 1)) : b && b.children[0];
-          if (b && c) rotateAxis(b, this.curlAxis(b, c, side), POSE.doigts.flexion[i - 1] * DEG);
+          if (b && c) rotateAxis(b, this.curlAxis(b, c, side), flexion[i - 1] * DEG);
         }
       }
-      for (let i = 1; i <= 3; i++) {
-        const b = S('Thumb' + i), c = i < 3 ? S('Thumb' + (i + 1)) : b && b.children[0];
-        if (b && c) rotateAxis(b, this.curlAxis(b, c, side), POSE.doigts.pouce[i - 1] * DEG);
+      // pouce : légèrement plié, son bout vient se poser sur le joystick
+      const t1 = S('Thumb1'), t2 = S('Thumb2'), t3 = S('Thumb3');
+      for (const [b, c, k] of [[t2, t3, 1], [t3, t3 && t3.children[0], 2]]) if (b && c) rotateAxis(b, this.curlAxis(b, c, side), Pr.pouce[k] * DEG);
+      if (t1 && t2) {
+        const bout = t3 ? (t3.children[0] ? wp(t3.children[0]) : wp(t3).add(wp(t3).sub(wp(t2)).multiplyScalar(0.8))) : wp(t2);
+        const joystick = point(s * 0.022, 0.03, -0.022);
+        wp(t1, _a);
+        rotateWorld(t1, _q3.setFromUnitVectors(bout.sub(_a).normalize(), joystick.sub(_a).normalize()));
       }
     }
+    // la manette suit ensuite les mains (sursauts, respiration)
+    this.manetteRel = this.repereMains().invert().multiply(M);
   }
 
-  /** Place la manette entre les deux mains, à chaque image. */
-  updateController(tilt = 0) {
-    const B = this.B;
-    const hl = wp(B.leftHand), hr = wp(B.rightHand);
+  /** Repère voulu pour la manette (d'après POSE.manette) : x = gauche du joueur, y = haut, z = vers la télé. */
+  repereManette(hips) {
+    const Mn = POSE.manette, x = this.L.clone();
+    const z = this.F.clone().applyAxisAngle(x, -Mn.inclinaison * DEG);
+    const y = new THREE.Vector3().crossVectors(z, x);
+    const centre = hips.clone().addScaledVector(this.F, Mn.avant).addScaledVector(this.U, Mn.hauteur);
+    return new THREE.Matrix4().makeBasis(x, y, z).setPosition(centre);
+  }
+
+  /** Repère formé par les deux mains : la manette y reste attachée quand les bras bougent. */
+  repereMains() {
+    const B = this.B, hl = wp(B.leftHand), hr = wp(B.rightHand);
     const ml = B.leftMiddle1 ? wp(B.leftMiddle1) : hl.clone().addScaledVector(this.F, 0.08);
     const mr = B.rightMiddle1 ? wp(B.rightMiddle1) : hr.clone().addScaledVector(this.F, 0.08);
-    const lateral = hl.clone().sub(hr).normalize();
-    const fwd = ml.sub(hl).add(mr.sub(hr)).normalize();
-    fwd.addScaledVector(lateral, -fwd.dot(lateral)).normalize();
-    fwd.applyAxisAngle(lateral, -(POSE.manette.inclinaison * DEG * 0.5 + tilt));
-    const up = new THREE.Vector3().crossVectors(fwd, lateral);
-    const m = new THREE.Matrix4().makeBasis(lateral, up, fwd);
-    this.controller.quaternion.setFromRotationMatrix(m);
-    this.controller.position.copy(hl).add(hr).multiplyScalar(0.5).addScaledVector(fwd, 0.055).addScaledVector(up, 0.012);
+    const x = hl.clone().sub(hr).normalize();
+    const z = ml.sub(hl).add(mr.sub(hr));
+    z.addScaledVector(x, -z.dot(x)).normalize();
+    const y = new THREE.Vector3().crossVectors(z, x);
+    return new THREE.Matrix4().makeBasis(x, y, z).setPosition(hl.add(hr).multiplyScalar(0.5));
+  }
+
+  /** Place la manette dans les mains, à chaque image (tilt : petit basculement pendant les sursauts). */
+  updateController(tilt = 0) {
+    const m = this.repereMains().multiply(this.manetteRel);
+    if (tilt) m.multiply(new THREE.Matrix4().makeRotationX(-tilt));
+    m.decompose(this.controller.position, this.controller.quaternion, _s);
   }
 
   /** Animation : respiration, tête, pouces, petits sursauts de jeu. */
