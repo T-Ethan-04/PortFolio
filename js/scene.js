@@ -300,7 +300,7 @@ export function buildRoom(renderer, screenMaterial) {
   add(new THREE.CircleGeometry(0.004, 12), M.blueLight, 0.74, B.bas + 0.24, -3.174, cab, false);
 
   // console de salon (style PS5, sans logo ni marque), debout sur le plateau
-  const ps = new THREE.Group(); ps.position.set(1.28, yTop, -3.27); ps.rotation.y = -0.55; cab.add(ps);
+  const ps = new THREE.Group(); ps.position.set(1.0, yTop, -3.27); ps.rotation.y = -0.55; cab.add(ps);   // à la jonction enduit / tasseaux
   add(rbox(0.07, 0.36, 0.23, 0.012), M.black, 0, 0.19, 0, ps);
   const wing = new THREE.Shape();
   wing.moveTo(-0.12, 0); wing.lineTo(0.11, 0); wing.quadraticCurveTo(0.15, 0.2, 0.135, 0.405); wing.quadraticCurveTo(0.0, 0.385, -0.15, 0.415); wing.quadraticCurveTo(-0.125, 0.2, -0.12, 0);
