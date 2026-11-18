@@ -62,7 +62,7 @@ function normalize(data) {
     elements: (s.elements || []).map(e => (typeof e === 'string' ? { texte: e } : e)).filter(e => e && e.texte),
     bouton: s.bouton && s.bouton.texte ? s.bouton : null,
   }));
-  return { profil, sections, reglages: data.reglages || {} };
+  return { profil, sections, reglages: data.reglages || {}, musique: data.musique || {} };
 }
 
 /** Un élément a-t-il une sous-page (détail affiché en grand) ? */

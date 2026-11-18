@@ -1,0 +1,2 @@
+Mets ici tes morceaux MP3 libres de droits, puis liste-les dans content.json (rubrique "musique").
+Voir le README, partie « Musique (l'enceinte) ».

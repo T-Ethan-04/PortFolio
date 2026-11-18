@@ -14,6 +14,7 @@ Une **version simple** (`simple.html`), lisible partout et bien référencée, e
 /js/sound.js         les sons d'interface (synthétisés, aucun fichier audio)
 /js/effects.js       le rendu « cinéma » (vignettage, grain)
 /js/eclairage.js     la lumière selon l'heure (réglages dans l'objet ECLAIRAGE)
+/js/musique.js       l'enceinte : lecteur et ambiances lo-fi composées en direct
 /js/content.js       lecture de content.json (partagé avec simple.html)
 /js/icons.js         les icônes des sections
 /assets/             ton avatar, le CV, les modèles 3D, textures, éclairage, images
@@ -217,6 +218,31 @@ La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur 
 - **Tester une heure** : ajoute `?heure=12`, `?heure=23` ou `?heure=7h30` à l'adresse (ex. `https://ethan-tosic.vercel.app/?heure=7h30`).
   `?cycle=60` fait défiler une journée entière en 60 secondes. Dans la console (F12) : `__portfolio.heure(19.5)`.
 - **Tous les réglages** (horaires, couleurs, intensités, course du soleil) sont dans l'objet **`ECLAIRAGE`**, en haut de `js/eclairage.js`.
+
+---
+
+### Musique (l'enceinte)
+
+Une enceinte est posée sur le meuble TV. Un clic dessus, ou sur le bouton ♪ en haut à droite, lance la musique.
+Rien ne démarre tout seul. Un petit lecteur apparaît en bas à droite (titre, précédent / suivant, pause, volume).
+La musique baisse quand on navigue dans la télé, et le bouton son la coupe.
+
+- **Par défaut**, l'enceinte joue 3 ambiances lo-fi composées en direct par le navigateur (aucun fichier).
+- **Pour mettre tes morceaux** : copie tes MP3 dans `assets/musique/`, puis liste-les dans `content.json` :
+
+```json
+"musique": {
+  "volume": 0.6,
+  "pistes": [
+    { "titre": "Nom du morceau", "artiste": "Nom de l'artiste", "fichier": "assets/musique/morceau.mp3" }
+  ]
+}
+```
+
+  Dès qu'un morceau est listé, il remplace les ambiances composées en direct.
+- ⚠️ Uniquement des morceaux **libres de droits** (bibliothèque audio YouTube, Pixabay Music, Free Music Archive en licence CC…).
+  Si la licence demande de citer l'artiste, ajoute-le dans la partie « Crédits ».
+- Préfère des MP3 légers (128 à 192 kbit/s) : quelques Mo par morceau.
 
 ---
 

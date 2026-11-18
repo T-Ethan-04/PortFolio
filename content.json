@@ -32,6 +32,11 @@
     "centresInteret": ["Tennis", "Cuisine", "Backgammon", "Cinéma", "Voyages"]
   },
 
+  "musique": {
+    "volume": 0.6,
+    "pistes": []
+  },
+
   "reglages": {
     "vignettesVisibles": 6,
     "sectionDepart": "apropos",

@@ -24,6 +24,7 @@ import { TVMenu } from './tvmenu.js';
 import { UISound } from './sound.js';
 import { createCinematicPass, createSanitizePass } from './effects.js';
 import { creerEclairage } from './eclairage.js';
+import { Musique, brancherLecteur } from './musique.js';
 
 // ---------------------------------------------------------------------
 //  Réglages
@@ -103,7 +104,15 @@ async function main() {
     soundBtn.classList.toggle('off', !sound.enabled);
   };
   refreshSoundBtn();
-  const toggleSound = () => { sound.setEnabled(!sound.enabled); refreshSoundBtn(); sound.play('focus'); };
+  // musique de l'enceinte : rien ne démarre tout seul (clic sur l'enceinte ou sur ♪)
+  const musique = new Musique(content.musique);
+  const lecteur = brancherLecteur(musique, $);
+  musique.setMuet(!sound.enabled);
+  musique.onChange(e => {
+    $('lecteur').classList.toggle('joue', e.joue);
+    if (e.joue && !sound.enabled) { sound.setEnabled(true); refreshSoundBtn(); musique.setMuet(false); }   // lancer la musique = vouloir du son
+  });
+  const toggleSound = () => { sound.setEnabled(!sound.enabled); refreshSoundBtn(); musique.setMuet(!sound.enabled); sound.play('focus'); };
   soundBtn.addEventListener('click', toggleSound);
   const unlockAudio = () => { if (sound.enabled) sound.unlock(); };
   addEventListener('pointerdown', unlockAudio, { capture: true });
@@ -301,6 +310,7 @@ async function main() {
     mode = 'flying'; controls.enabled = false;
     menu.setHover(false);
     sound.play('enter');
+    musique.setAttenuation(true); document.body.classList.add('tv-mode');
     const v = tvView();
     fly(v.pos, v.tgt, () => {
       mode = 'tv'; gtao.enabled = false; bloom.strength = 0.14;   // texte plus net sur l'écran
@@ -314,6 +324,7 @@ async function main() {
     mode = 'flying'; back.classList.remove('on'); bloom.strength = 0.28;
     menu.hoverAt(null);
     sound.play('leave');
+    musique.setAttenuation(false); document.body.classList.remove('tv-mode');
     fly(roomPos(), ROOM_TGT.clone(), () => {
       mode = 'room'; controls.enabled = true; gtao.enabled = QUALITE[quality].ao;
       look.x = look.y = look.tx = look.ty = 0;
@@ -332,6 +343,15 @@ async function main() {
     ray.setFromCamera(ptr, camera);
     return ray.intersectObject(room.screen)[0];
   }
+  function pickEnceinte(e) {
+    ptr.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    return ray.intersectObject(room.enceinte.zone, false)[0];
+  }
+  let surEnceinte = false;
+  musique.onChange(e => {   // texte d'aide à jour si la souris est sur l'enceinte
+    if (surEnceinte) hintText.textContent = e.joue ? 'Clique sur l\'enceinte pour mettre la musique en pause' : 'Clique sur l\'enceinte pour lancer la musique';
+  });
   let downAt = null, dragging = false;
   const look = { x: 0, y: 0, tx: 0, ty: 0 };   // parallaxe : la caméra suit légèrement la souris
   canvas.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; dragging = true; lastInput = performance.now(); });
@@ -340,6 +360,7 @@ async function main() {
     if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
     downAt = null;
     if (mode === 'intro') return endIntro();
+    if (mode === 'room' && pickEnceinte(e)) { musique.basculer(); lecteur.montrer(); return; }
     const hit = pick(e);
     if (!hit) return;
     if (mode === 'room') enterTV();
@@ -353,6 +374,12 @@ async function main() {
     let pointer = false;
     if (mode === 'tv') pointer = menu.hoverAt(hit ? hit.uv : null);
     else if (mode === 'room') { pointer = !!hit; menu.setHover(pointer); }
+    const enceinte = mode === 'room' && !hit && !!pickEnceinte(e);
+    if (enceinte !== surEnceinte) {
+      surEnceinte = enceinte;
+      hintText.textContent = enceinte ? (musique.joue ? 'Clique sur l\'enceinte pour mettre la musique en pause' : 'Clique sur l\'enceinte pour lancer la musique') : roomHint;
+    }
+    pointer = pointer || enceinte;
     canvas.style.cursor = pointer ? 'pointer' : (mode === 'room' ? 'grab' : 'default');
   });
   canvas.addEventListener('pointerleave', () => menu.setHover(false));
@@ -414,6 +441,7 @@ async function main() {
     avatar.update(dt, t);
     menu.update(dt);
     eclairage.update(dt, t);
+    room.enceinte.pulser(musique.niveau(), musique.joue);
     room.update(dt, t);
     if (intro) updateIntro(dt);
     else if (tween) {
@@ -445,7 +473,7 @@ async function main() {
 
   hideLoader();
   window.__portfolio = {
-    scene, camera, avatar, menu, renderer, room, sound, applyQuality, eclairage,
+    scene, camera, avatar, menu, renderer, room, sound, applyQuality, eclairage, musique,
     /** Change l'heure de l'éclairage (ex. 19.5 ou "7h30") ; null = heure réelle. */
     heure: h => eclairage.heure(h),
     get mode() { return mode; }, get quality() { return quality; }, enterTV, leaveTV, endIntro,
