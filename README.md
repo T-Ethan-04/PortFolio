@@ -14,7 +14,7 @@ Une **version simple** (`simple.html`), lisible partout et bien référencée, e
 /js/sound.js         les sons d'interface (synthétisés, aucun fichier audio)
 /js/effects.js       le rendu « cinéma » (vignettage, grain)
 /js/eclairage.js     la lumière selon l'heure (réglages dans l'objet ECLAIRAGE)
-/js/musique.js       l'enceinte : lecteur et ambiances lo-fi composées en direct
+/js/musique.js       les enceintes : lecteur et ambiances composées en direct (lo-fi, slow au saxo)
 /js/content.js       lecture de content.json (partagé avec simple.html)
 /js/icons.js         les icônes des sections
 /assets/             ton avatar, le CV, les modèles 3D, textures, éclairage, images
@@ -227,7 +227,9 @@ Deux enceintes sur pied encadrent le meuble TV. Un clic sur l'une d'elles, ou su
 Rien ne démarre tout seul. Un petit lecteur apparaît en bas à droite (titre, précédent / suivant, pause, volume).
 La musique baisse quand on navigue dans la télé, et le bouton son la coupe.
 
-- **Par défaut**, l'enceinte joue 3 ambiances lo-fi composées en direct par le navigateur (aucun fichier).
+- **Par défaut**, l'enceinte joue 4 ambiances composées en direct par le navigateur (aucun fichier, aucun droit à payer) :
+  « Lo-fi du salon », « Pluie sur la forêt », « Fin de soirée » et « Saxo de minuit », un slow années 80 au saxophone
+  (mélodie et grille originales, écrites dans `STATIONS` en haut de `js/musique.js`).
 - **Pour mettre tes morceaux** : copie tes MP3 dans `assets/musique/`, puis liste-les dans `content.json` :
 
 ```json
