@@ -47,18 +47,23 @@
   #musBtn:hover { background: rgba(30, 34, 50, .9); }
   #musBtn.on { background: rgba(255, 179, 110, .28); border-color: rgba(255, 196, 140, .7); }
 
-  /* petit lecteur de musique (enceinte) */
-  #lecteur { position: fixed; right: 28px; bottom: 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; row-gap: 8px; padding: 10px 12px 10px 14px; border: 1px solid var(--line); border-radius: 18px; z-index: 3; width: 300px; max-width: calc(100vw - 56px); box-sizing: border-box; transition: opacity .4s; }
-  #lecteur .eq { order: 0; } #lecteur .titre { order: 1; } #musFermer { order: 2; }
-  #musPrev, #musPlay, #musNext { order: 3; } #musVolume { order: 4; flex: 1 !important; width: auto !important; min-width: 60px; }
+  /* lecteur de musique des enceintes */
+  #lecteur { position: fixed; right: 28px; bottom: 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; row-gap: 8px; padding: 10px 12px 12px 14px; border: 1px solid var(--line); border-radius: 18px; z-index: 3; width: 360px; max-width: calc(100vw - 56px); box-sizing: border-box; transition: opacity .4s; }
+  #lecteur .sources { order: 0; } #musEcran { order: 1; } #lecteur .eq { order: 2; } #lecteur .titre { order: 3; } #musFermer { order: 4; }
+  #lecteur .saut { order: 5; flex: 0 0 100%; height: 0; margin-top: -8px; }   /* les commandes passent à la ligne */
+  #musPrev, #musPlay, #musNext { order: 6; } #musVolume { order: 7; flex: 1 !important; width: auto !important; min-width: 60px; }
+  #musNote { order: 8; } #musPistes { order: 9; }
   body.tv-mode #lecteur { opacity: 0; pointer-events: none; }
+  /* un clip officiel qui joue reste visible (en version compacte) quand on regarde la télé */
+  body.tv-mode #lecteur.clip.joue { opacity: 1; pointer-events: auto; width: 300px; }
+  body.tv-mode #lecteur.clip .sources, body.tv-mode #lecteur.clip #musNote, body.tv-mode #lecteur.clip #musPistes { display: none; }
   #lecteur button { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(255,255,255,.08); display: grid; place-items: center; cursor: pointer; padding: 0; color: #fff; }
   #lecteur button:hover { background: rgba(255,255,255,.2); }
   #lecteur svg { width: 15px; height: 15px; }
   #musPlay { background: rgba(255, 179, 110, .3) !important; }
   #musPlay .pause, #musPlay.on .lire { display: none; }
   #musPlay.on .pause { display: inline; }
-  #lecteur .titre { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }   /* 1re ligne : titre ; 2e ligne : commandes */
+  #lecteur .titre { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }   /* titre puis commandes */
   #lecteur .titre b { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #lecteur .titre span { font-size: 11px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #musVolume { flex: none; width: 64px; accent-color: #ffb36e; }
@@ -67,6 +72,29 @@
   #lecteur.joue .eq i { animation: eq .9s ease-in-out infinite alternate; }
   #lecteur.joue .eq i:nth-child(2) { animation-delay: -.3s; } #lecteur.joue .eq i:nth-child(3) { animation-delay: -.6s; }
   @keyframes eq { from { height: 25%; } to { height: 100%; } }
+  /* choix de la source */
+  #lecteur .sources { flex: 1 1 100%; display: flex; gap: 2px; padding: 3px; border-radius: 11px; background: rgba(255,255,255,.07); }
+  #lecteur .sources button { flex: 1 1 auto; width: auto; height: 28px; border-radius: 8px; padding: 0 8px; background: none; font-size: 11.5px; font-weight: 600; opacity: .7; white-space: nowrap; }
+  #lecteur .sources button:hover { background: rgba(255,255,255,.1); opacity: 1; }
+  #lecteur .sources button[aria-pressed="true"] { background: rgba(255, 179, 110, .3); opacity: 1; }
+  /* écran du lecteur officiel (YouTube : 200 px de haut au minimum) */
+  #musEcran { position: relative; flex: 1 1 100%; aspect-ratio: 16 / 9; min-height: 200px; border-radius: 12px; overflow: hidden; background: #000; }
+  #musEcran[data-source="mj-spotify"] { aspect-ratio: auto; min-height: 0; height: 152px; background: rgba(255,255,255,.05); }
+  #musEcran .hote { position: absolute; inset: 0; display: none; }
+  #musEcran[data-source="mj-youtube"] #ecran-mj-youtube, #musEcran[data-source="mj-spotify"] #ecran-mj-spotify { display: block; }
+  #musEcran iframe { display: block; width: 100%; height: 100%; border: 0; }
+  #musAttente { position: absolute; inset: 0; margin: 0; padding: 0 16px; display: grid; place-items: center; text-align: center; font-size: 12.5px; color: rgba(255,255,255,.75); pointer-events: none; }
+  /* message et liste des morceaux */
+  #musNote { flex: 1 1 100%; margin: 0; font-size: 11px; line-height: 1.4; color: rgba(255,255,255,.7); }
+  #musNote a { font: inherit; color: #ffcf9e; }
+  #musPistes { flex: 1 1 100%; display: flex; flex-direction: column; gap: 1px; list-style: none; margin: 0; padding: 6px 0 0; border-top: 1px solid rgba(255,255,255,.12); }
+  #musPistes button { width: 100%; height: 30px; border-radius: 8px; background: none; display: flex; align-items: center; gap: 10px; padding: 0 8px; font-size: 12.5px; font-weight: 500; text-align: left; }
+  #musPistes button:hover { background: rgba(255,255,255,.1); }
+  #musPistes button[aria-current="true"] { background: rgba(255, 179, 110, .16); color: #ffd2a6; }
+  #musPistes .n { width: 14px; font-size: 11px; opacity: .55; font-variant-numeric: tabular-nums; }
+  #musPistes .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #musPistes .x { font-size: 11px; opacity: .55; }
+  #musPistes .indispo { opacity: .4; text-decoration: line-through; }
   #soundBtn svg { width: 20px; height: 20px; }
   #soundBtn .x { display: none; }
   #soundBtn.off .w { display: none; }
@@ -127,6 +155,10 @@
     #soundBtn, #musBtn { width: 38px; height: 38px; }
     #lecteur { left: 12px; right: 12px; bottom: 136px; width: auto; max-width: none; }
     #musVolume { display: none; }
+    #musPistes { flex-direction: row; gap: 6px; overflow-x: auto; padding: 0; border-top: 0; scrollbar-width: none; }
+    #musPistes li { flex: none; }
+    #musPistes button { width: auto; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.08); }
+    #musPistes .n, #musPistes .x { display: none; }
   }
   @media (max-width: 1100px) and (min-width: 641px) { #lecteur { bottom: 84px; } }
   @media (prefers-reduced-motion: reduce) { #hint i, #lecteur.joue .eq i { animation: none; } }
@@ -180,6 +212,16 @@
 <div id="hint" class="pill ui"><i aria-hidden="true">✕</i><span id="hintText">Clique sur la télé pour commencer · glisse pour tourner</span></div>
 <button id="back" type="button">← Retour au salon</button>
 <div id="lecteur" class="pill ui" role="region" aria-label="Lecteur de musique" hidden>
+  <div class="sources" role="group" aria-label="Source de la musique">
+    <button type="button" data-source="mj-youtube" aria-pressed="true" title="Michael Jackson : clips officiels sur YouTube">MJ · YouTube</button>
+    <button type="button" data-source="mj-spotify" aria-pressed="false" title="Michael Jackson : titres sur Spotify">MJ · Spotify</button>
+    <button type="button" data-source="ambiances" aria-pressed="false" title="Ambiances lo-fi composées en direct">Ambiances</button>
+  </div>
+  <div id="musEcran" hidden>
+    <div class="hote" id="ecran-mj-youtube"></div>
+    <div class="hote" id="ecran-mj-spotify"></div>
+    <p id="musAttente">Appuie sur ▶ pour lancer le titre</p>
+  </div>
   <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
   <div class="titre"><b id="musTitre">Musique</b><span id="musArtiste"></span></div>
   <button id="musPrev" type="button" aria-label="Morceau précédent"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
@@ -187,6 +229,9 @@
   <button id="musNext" type="button" aria-label="Morceau suivant"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
   <input id="musVolume" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume de la musique">
   <button id="musFermer" type="button" aria-label="Arrêter la musique et fermer le lecteur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <i class="saut" aria-hidden="true"></i>
+  <p id="musNote" aria-live="polite" hidden></p>
+  <ol id="musPistes" aria-label="Morceaux"></ol>
 </div>
 <button id="skip" type="button" hidden>Passer l'intro →</button>
 <div id="slowToast" class="pill" hidden role="alert">

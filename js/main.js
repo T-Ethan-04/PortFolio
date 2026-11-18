@@ -24,7 +24,9 @@ import { TVMenu } from './tvmenu.js';
 import { UISound } from './sound.js';
 import { createCinematicPass, createSanitizePass } from './effects.js';
 import { creerEclairage } from './eclairage.js';
-import { Musique, brancherLecteur } from './musique.js';
+import { Musique } from './musique.js';
+import { ClipsYouTube, ClipsSpotify, PISTES_MJ } from './clips.js';
+import { Platine, brancherLecteur } from './lecteur.js';
 
 // ---------------------------------------------------------------------
 //  Réglages
@@ -104,8 +106,13 @@ async function main() {
     soundBtn.classList.toggle('off', !sound.enabled);
   };
   refreshSoundBtn();
-  // musique de l'enceinte : rien ne démarre tout seul (clic sur l'enceinte ou sur ♪)
-  const musique = new Musique(content.musique);
+  // musique des enceintes : rien ne démarre tout seul (clic sur une enceinte ou sur ♪).
+  // Trois sources : titres officiels de Michael Jackson (YouTube ou Spotify) et ambiances lo-fi.
+  const musique = new Platine([
+    new ClipsYouTube(PISTES_MJ, content.musique.volume),
+    new ClipsSpotify(PISTES_MJ, content.musique.volume),
+    new Musique(content.musique),
+  ]);
   const lecteur = brancherLecteur(musique, $);
   musique.setMuet(!sound.enabled);
   musique.onChange(e => {

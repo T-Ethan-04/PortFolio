@@ -14,7 +14,9 @@ Une **version simple** (`simple.html`), lisible partout et bien référencée, e
 /js/sound.js         les sons d'interface (synthétisés, aucun fichier audio)
 /js/effects.js       le rendu « cinéma » (vignettage, grain)
 /js/eclairage.js     la lumière selon l'heure (réglages dans l'objet ECLAIRAGE)
-/js/musique.js       l'enceinte : lecteur et ambiances lo-fi composées en direct
+/js/lecteur.js       les enceintes : la platine (sources de musique) et son lecteur
+/js/clips.js         titres de Michael Jackson via les lecteurs officiels YouTube / Spotify
+/js/musique.js       ambiances lo-fi composées en direct (ou tes MP3 libres de droits)
 /js/content.js       lecture de content.json (partagé avec simple.html)
 /js/icons.js         les icônes des sections
 /assets/             ton avatar, le CV, les modèles 3D, textures, éclairage, images
@@ -224,10 +226,26 @@ La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur 
 ### Musique (l'enceinte)
 
 Deux enceintes sur pied encadrent le meuble TV. Un clic sur l'une d'elles, ou sur le bouton ♪ en haut à droite, lance la musique.
-Rien ne démarre tout seul. Un petit lecteur apparaît en bas à droite (titre, précédent / suivant, pause, volume).
+Rien ne démarre tout seul. Un lecteur apparaît en bas à droite (source, titre, précédent / suivant, pause, volume, liste des morceaux).
 La musique baisse quand on navigue dans la télé, et le bouton son la coupe.
 
-- **Par défaut**, l'enceinte joue 3 ambiances lo-fi composées en direct par le navigateur (aucun fichier).
+Le lecteur propose trois sources (onglets en haut du lecteur) :
+
+- **MJ · YouTube** (par défaut) : 4 titres de Michael Jackson, joués par le lecteur officiel YouTube intégré
+  (clips officiels). La vidéo reste visible dans le lecteur pendant la lecture, c'est une règle de YouTube ;
+  en mode télé, le lecteur passe en version compacte. Si un clip refuse la lecture sur un autre site, il est barré
+  dans la liste et le lecteur passe au suivant.
+- **MJ · Spotify** : les mêmes titres avec le lecteur officiel Spotify. Sans compte Spotify connecté dans le
+  navigateur, Spotify ne joue qu'un extrait de 30 secondes. Pas de réglage de volume (l'intégration Spotify ne le permet pas).
+- **Ambiances** : 3 ambiances lo-fi composées en direct par le navigateur (aucun fichier).
+
+Aucun fichier audio de Michael Jackson n'est hébergé sur le site : ce sont les lecteurs officiels, chargés seulement
+quand le visiteur lance un titre. La liste des titres est en haut de `js/clips.js` (`PISTES_MJ` : titre, année, tempo,
+identifiant YouTube, identifiant Spotify).
+
+Pour l'onglet **Ambiances** :
+
+- **Par défaut**, il joue 3 ambiances lo-fi composées en direct par le navigateur (aucun fichier).
 - **Pour mettre tes morceaux** : copie tes MP3 dans `assets/musique/`, puis liste-les dans `content.json` :
 
 ```json

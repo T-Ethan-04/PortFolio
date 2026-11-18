@@ -1,5 +1,6 @@
 // =====================================================================
-//  musique.js — Les enceintes du salon : un petit lecteur de musique.
+//  musique.js — Source « Ambiances » des enceintes du salon
+//  (la platine qui réunit les sources est dans lecteur.js).
 //
 //  • Rien ne se lance tout seul : la musique démarre quand le visiteur
 //    clique sur une enceinte (ou sur le bouton ♪ en haut à droite).
@@ -198,6 +199,7 @@ class Station {
 export class Musique {
   /** @param reglages  rubrique "musique" de content.json ({ volume, pistes }) */
   constructor(reglages = {}) {
+    this.id = 'ambiances'; this.nom = 'Ambiances';
     this.fichiers = (reglages.pistes || []).filter(p => p && p.fichier);
     this.volume = clamp01(reglages.volume ?? 0.6);
     this.index = 0; this.joue = false; this.attenue = false; this.muet = false;
@@ -319,6 +321,14 @@ export class Musique {
   suivant() { this.changer(1); }
   precedent() { this.changer(-1); }
 
+  /** Passe au morceau n° i de la liste (et le lance si « jouer »). */
+  choisir(i, jouer = this.joue) {
+    if (i < 0 || i >= this.liste.length) return;
+    if (i !== this.index) { this.index = i; if (this.audio) this.audio.removeAttribute('src'); if (this.joue) this.lancerPiste(); }
+    if (jouer && !this.joue) this.lecture();
+    else this.signaler();
+  }
+
   setVolume(v) { this.volume = clamp01(v); this.appliquerVolume(0.05); }
   /** Baisse la musique (par exemple quand on navigue dans le menu de la télé). */
   setAttenuation(on) { this.attenue = on; this.appliquerVolume(0.6); }
@@ -334,27 +344,4 @@ export class Musique {
     this.niveauLisse += (Math.min(1, rms * 4) - this.niveauLisse) * 0.25;
     return this.niveauLisse;
   }
-}
-
-/** Relie le petit lecteur (HTML de index.html) à la musique. */
-export function brancherLecteur(musique, $) {
-  const boite = $('lecteur'), bouton = $('musBtn');
-  const titre = $('musTitre'), artiste = $('musArtiste'), play = $('musPlay'), vol = $('musVolume');
-  vol.value = String(musique.volume);
-  musique.onChange(e => {
-    titre.textContent = e.titre; artiste.textContent = e.artiste;
-    play.classList.toggle('on', e.joue);
-    play.setAttribute('aria-label', e.joue ? 'Mettre en pause' : 'Lancer la musique');
-    bouton.classList.toggle('on', e.joue);
-    bouton.setAttribute('aria-pressed', String(e.joue));
-    bouton.title = e.joue ? 'Mettre la musique en pause' : 'Lancer la musique';
-  });
-  const montrer = () => { boite.hidden = false; };
-  play.addEventListener('click', () => musique.basculer());
-  $('musPrev').addEventListener('click', () => musique.precedent());
-  $('musNext').addEventListener('click', () => musique.suivant());
-  $('musFermer').addEventListener('click', () => { musique.pause(); boite.hidden = true; });
-  vol.addEventListener('input', () => musique.setVolume(+vol.value));
-  bouton.addEventListener('click', () => { musique.basculer(); montrer(); });
-  return { montrer };
 }
