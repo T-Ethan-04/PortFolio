@@ -182,17 +182,27 @@ export class ClipsYouTube extends SourceClips {
     this.signaler();
   }
 
-  /** 2 : identifiant invalide · 5 : erreur du lecteur · 100 : vidéo introuvable · 101 / 150 : intégration refusée. */
+  /**
+   * Erreurs du lecteur YouTube :
+   *   2 : identifiant invalide · 100 : vidéo introuvable · 101 / 150 : intégration refusée par l'ayant droit
+   *   → propres au titre : on le barre et on passe au suivant.
+   *   5 : erreur du lecteur · 153 : navigateur qui masque l'adresse du site (référent)
+   *   → propres au navigateur du visiteur : on s'arrête avec un message, sans barrer le titre.
+   */
   echec(code) {
     clearTimeout(this.garde);
     const titre = this.piste.titre;
-    this.indisponibles.add(this.index);
     this.lienErreur = this.lien(this.piste);
     this.enLecture = false;
-    this.erreur = code === 101 || code === 150
-      ? `« ${titre} » ne peut être lu que sur YouTube.`
-      : `« ${titre} » est introuvable sur YouTube.`;
     console.warn(`[musique] YouTube, erreur ${code} pour « ${titre} »`);
+    if (![2, 100, 101, 150].includes(code)) {
+      this.joue = false;
+      this.erreur = `Le lecteur YouTube n’a pas pu démarrer dans ce navigateur (erreur ${code}).`;
+      this.signaler();
+      return;
+    }
+    this.indisponibles.add(this.index);
+    this.erreur = code === 101 || code === 150 ? `« ${titre} » ne peut être lu que sur YouTube.` : `« ${titre} » est introuvable sur YouTube.`;
     const suite = this.disponible(this.index + 1);
     if (this.joue && suite >= 0) setTimeout(() => { if (this.joue) this.choisir(suite, true, true); }, 2500);   // on enchaîne en gardant le message
     else this.joue = false;
