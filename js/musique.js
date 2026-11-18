@@ -1,8 +1,8 @@
 // =====================================================================
-//  musique.js — L'enceinte du salon : un petit lecteur de musique.
+//  musique.js — Les enceintes du salon : un petit lecteur de musique.
 //
 //  • Rien ne se lance tout seul : la musique démarre quand le visiteur
-//    clique sur l'enceinte (ou sur le bouton ♪ en haut à droite).
+//    clique sur une enceinte (ou sur le bouton ♪ en haut à droite).
 //  • Les morceaux sont listés dans content.json, rubrique "musique" :
 //      "musique": { "volume": 0.6, "pistes": [
 //        { "titre": "…", "artiste": "…", "fichier": "assets/musique/morceau.mp3" } ] }

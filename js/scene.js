@@ -159,7 +159,8 @@ export function buildRoom(renderer, screenMaterial) {
     ceramic: new THREE.MeshPhysicalMaterial({ color: '#efebe4', roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
     blackCeramic: new THREE.MeshPhysicalMaterial({ color: '#141415', roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.25 }),
     sofa: new THREE.MeshPhysicalMaterial({ color: '#3a3b3f', map: fabricTex, roughness: 0.95, sheen: 1, sheenRoughness: 0.8, sheenColor: new THREE.Color('#8c8e95') }),
-    speaker: new THREE.MeshPhysicalMaterial({ color: '#36373a', map: fabricTex, roughness: 0.95, sheen: 0.8, sheenRoughness: 0.7, sheenColor: new THREE.Color('#6c6e74') }),
+    speakerBody: new THREE.MeshPhysicalMaterial({ color: '#46474a', roughness: 0.5, clearcoat: 0.25, clearcoatRoughness: 0.4 }),
+    membrane: new THREE.MeshStandardMaterial({ color: '#232427', roughness: 0.55, side: THREE.DoubleSide }),
     ottoman: new THREE.MeshPhysicalMaterial({ color: '#b2a590', map: fabricTex, roughness: 0.95, sheen: 1, sheenRoughness: 0.7, sheenColor: new THREE.Color('#f3e9d9') }),
     rug: new THREE.MeshPhysicalMaterial({ map: rugTex, roughness: 1, sheen: 0.5, sheenRoughness: 0.9, sheenColor: new THREE.Color('#d6d0c6') }),
     tableTop: new THREE.MeshPhysicalMaterial({ color: '#252527', roughness: 0.4, clearcoat: 0.35, clearcoatRoughness: 0.4 }),
@@ -310,15 +311,23 @@ export function buildRoom(renderer, screenMaterial) {
   for (const s of [-1, 1]) add(new THREE.BoxGeometry(0.004, 0.33, 0.004), M.blueLight, s * 0.037, 0.2, 0.118, ps, false);
   add(new THREE.CylinderGeometry(0.06, 0.06, 0.012, 24), M.black, 0, 0.006, 0, ps);
 
-  // enceinte connectée (cliquable : musique, voir musique.js) — LED qui pulse au rythme
-  const enceinte = new THREE.Group(); enceinte.position.set(1.72, yTop, -3.27); enceinte.rotation.y = -0.3; cab.add(enceinte);
+  // paire d'enceintes sur pied, de chaque côté du meuble (cliquables : musique, voir musique.js)
+  // anthracite comme les façades, cercle en laiton comme la lampe, pieds noirs comme les étagères
   const ledEnceinte = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.25, 0.25, 0.27) });
-  add(rbox(0.15, 0.235, 0.13, 0.035, 4), M.speaker, 0, 0.1175, 0, enceinte);
-  add(rbox(0.152, 0.014, 0.132, 0.006, 2), M.matteBlack, 0, 0.236, 0, enceinte);
-  add(new THREE.BoxGeometry(0.05, 0.005, 0.003), ledEnceinte, 0, 0.03, 0.0655, enceinte, false);
-  for (const x of [-0.03, 0, 0.03]) add(new THREE.CylinderGeometry(0.008, 0.008, 0.003, 16), M.metal, x, 0.2445, 0.03, enceinte, false);
-  const zoneEnceinte = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.42, 0.3), new THREE.MeshBasicMaterial());
-  zoneEnceinte.position.set(0, 0.14, 0.02); zoneEnceinte.visible = false; enceinte.add(zoneEnceinte);   // zone de clic plus large
+  const zonesEnceintes = [];
+  for (const [x, rot] of [[-2.15, 0.35], [3.2, -0.45]]) {
+    const g = new THREE.Group(); g.position.set(x, 0, -3.1); g.rotation.y = rot; scene.add(g);
+    add(new THREE.CylinderGeometry(0.15, 0.16, 0.02, 48), M.matteBlack, 0, 0.01, 0, g);
+    add(new THREE.CylinderGeometry(0.02, 0.026, 0.6, 24), M.matteBlack, 0, 0.32, 0, g);
+    add(rbox(0.19, 0.014, 0.21, 0.004, 2), M.matteBlack, 0, 0.627, 0, g);
+    const e = new THREE.Group(); e.position.y = 0.634; g.add(e);
+    const l = 0.21, h = 0.34, p = 0.27;
+    add(rbox(l, h, p, 0.042, 6), M.speakerBody, 0, h / 2, 0, e);
+    hautParleur(e, 0, h * 0.56, p / 2 + 0.006, l * 0.34);
+    add(new THREE.CircleGeometry(0.0045, 16), ledEnceinte, 0, h * 0.14, p / 2 + 0.006, e, false);
+    const zone = new THREE.Mesh(new THREE.BoxGeometry(0.36, 1.05, 0.38), new THREE.MeshBasicMaterial());
+    zone.position.y = 0.5; zone.visible = false; g.add(zone); zonesEnceintes.push(zone);   // zone de clic (pied compris)
+  }
 
   // déco du plateau : vase blanc et branches séchées, coupelle, champignon noir, livres
   add(new THREE.LatheGeometry(profil([[0, 0], [0.07, 0], [0.105, 0.09], [0.1, 0.2], [0.06, 0.3], [0.052, 0.33], [0.058, 0.335], [0, 0.335]]), 48), M.ceramic, -1.32, yTop, -3.3);
@@ -432,9 +441,9 @@ export function buildRoom(renderer, screenMaterial) {
     bandeau: { materiau: M.ledStrip },
     vue,
     enveloppeSoleil,
-    // enceinte : zone de clic et LED (pilotées par main.js / musique.js)
+    // enceintes : zones de clic et LED (pilotées par main.js / musique.js)
     enceinte: {
-      zone: zoneEnceinte, led: ledEnceinte,
+      zones: zonesEnceintes, led: ledEnceinte,
       eteinte: new THREE.Color(0.25, 0.25, 0.27), allumee: new THREE.Color(2.4, 1.55, 0.75),
       /** Fait pulser la LED selon le niveau de la musique (0 à 1). */
       pulser(n, joue) { ledEnceinte.color.lerpColors(this.eteinte, this.allumee, joue ? 0.35 + 0.65 * Math.min(1, n * 1.6) : 0); },
@@ -473,6 +482,15 @@ export function buildRoom(renderer, screenMaterial) {
 
   // ---------- petits objets ----------
   function profil(points) { return points.map(([x, y]) => new THREE.Vector2(x, y)); }
+  /** Haut-parleur coaxial face à +z : membrane, suspension, cercle et dôme en laiton. */
+  function hautParleur(parent, x, y, z, r) {
+    const cone = new THREE.Mesh(new THREE.LatheGeometry([new THREE.Vector2(0.001, -0.016), new THREE.Vector2(r * 0.3, -0.013), new THREE.Vector2(r * 0.9, 0)], 48), M.membrane);
+    cone.rotation.x = Math.PI / 2; cone.position.set(x, y, z); parent.add(cone);
+    add(new THREE.TorusGeometry(r * 0.93, r * 0.07, 12, 64), M.matteBlack, x, y, z, parent, false);
+    add(new THREE.TorusGeometry(r * 1.06, r * 0.035, 10, 64), M.brass, x, y, z + 0.002, parent, false);
+    const dome = add(new THREE.SphereGeometry(r * 0.26, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M.brass, x, y, z - 0.004, parent, false);
+    dome.rotation.x = Math.PI / 2;
+  }
   function couleurLivre() { return ['#f1ede6', '#1c1c1d', '#d9cfc0', '#8d8378', '#e9e4da', '#2e2d2b', '#b9ae9e', '#5b5752'][Math.random() * 8 | 0]; }
   /** Livres debout côte à côte (x0 = bord gauche). */
   function rangeeLivres(parent, x0, y, z, n) {

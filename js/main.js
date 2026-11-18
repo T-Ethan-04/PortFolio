@@ -346,11 +346,11 @@ async function main() {
   function pickEnceinte(e) {
     ptr.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
     ray.setFromCamera(ptr, camera);
-    return ray.intersectObject(room.enceinte.zone, false)[0];
+    return ray.intersectObjects(room.enceinte.zones, false)[0];
   }
   let surEnceinte = false;
   musique.onChange(e => {   // texte d'aide à jour si la souris est sur l'enceinte
-    if (surEnceinte) hintText.textContent = e.joue ? 'Clique sur l\'enceinte pour mettre la musique en pause' : 'Clique sur l\'enceinte pour lancer la musique';
+    if (surEnceinte) hintText.textContent = e.joue ? 'Clique sur une enceinte pour mettre la musique en pause' : 'Clique sur une enceinte pour lancer la musique';
   });
   let downAt = null, dragging = false;
   const look = { x: 0, y: 0, tx: 0, ty: 0 };   // parallaxe : la caméra suit légèrement la souris
@@ -377,7 +377,7 @@ async function main() {
     const enceinte = mode === 'room' && !hit && !!pickEnceinte(e);
     if (enceinte !== surEnceinte) {
       surEnceinte = enceinte;
-      hintText.textContent = enceinte ? (musique.joue ? 'Clique sur l\'enceinte pour mettre la musique en pause' : 'Clique sur l\'enceinte pour lancer la musique') : roomHint;
+      hintText.textContent = enceinte ? (musique.joue ? 'Clique sur une enceinte pour mettre la musique en pause' : 'Clique sur une enceinte pour lancer la musique') : roomHint;
     }
     pointer = pointer || enceinte;
     canvas.style.cursor = pointer ? 'pointer' : (mode === 'room' ? 'grab' : 'default');

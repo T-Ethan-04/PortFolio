@@ -223,7 +223,7 @@ La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur 
 
 ### Musique (l'enceinte)
 
-Une enceinte est posée sur le meuble TV. Un clic dessus, ou sur le bouton ♪ en haut à droite, lance la musique.
+Deux enceintes sur pied encadrent le meuble TV. Un clic sur l'une d'elles, ou sur le bouton ♪ en haut à droite, lance la musique.
 Rien ne démarre tout seul. Un petit lecteur apparaît en bas à droite (titre, précédent / suivant, pause, volume).
 La musique baisse quand on navigue dans la télé, et le bouton son la coupe.
 
