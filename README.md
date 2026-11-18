@@ -176,12 +176,14 @@ Le salon : grande **baie vitrée** sur une forêt de sapins dans la brume, mur d
 **panneau à tasseaux** en noyer avec trois étagères noires, **meuble TV suspendu** (façades anthracite, plateau en chêne,
 niche avec ampli), **bandeau LED** au plafond, la **console** debout sur le meuble, la **lampe arc** en laiton,
 un grand tapis, une table basse noire, un pouf et un fauteuil.
+À gauche de la télé, un **tableau** dans un cadre en noyer, éclairé par une liseuse en laiton qui suit l'heure.
 
 | Fichier | Contenu |
 |---------|---------|
 | `assets/models/canape.glb` | canapé en velours incurvé, recoloré en gris anthracite (remplace le canapé dessiné en code) |
 | `assets/models/fauteuil.glb` | fauteuil en velours, recoloré en beige, près de la lampe |
 | `assets/models/plante.glb` | plante en pot, à côté de la baie |
+| `assets/images/tableau.jpg` | la toile du tableau (photo recadrée). Pour en changer : remplacer l'image, puis ajuster `rapport` (largeur ÷ hauteur) dans l'objet `TABLEAU` de `js/scene.js` |
 | `assets/textures/parquet/` | parquet en chêne clair : `couleur.jpg`, `rugosite.jpg`, `normale.jpg` (relief) |
 | `assets/textures/enduit/` | enduit du mur de la télé (couleur, brillance, relief) |
 | `assets/textures/chene/` | chêne clair du plateau et de l'embrasure de la baie |
