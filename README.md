@@ -24,14 +24,17 @@ Une **version simple** (`simple.html`), lisible partout et bien référencée, e
 
 ## 1. Ton avatar
 
-Tant que `assets/avatar.glb` n'existe pas, un **mannequin** design (blanc et noir) est assis à ta place.
-Dès que tu déposes ton avatar, il le remplace automatiquement : posé sur le canapé, manette en main, animé.
+Pour l'instant, un **avatar réaliste** est assis à ta place (`assets/avatar.glb`) : un personnage de la bibliothèque
+Microsoft Rocketbox (licence MIT, voir `assets/LICENCE-avatar.txt`), habillé d'un blazer gris, d'une chemise noire et d'un jean brut.
+Pour mettre **ton** avatar, remplace simplement ce fichier : il sera posé sur le canapé, manette en main, animé.
+(Si `avatar.glb` est absent, le mannequin blanc et noir `assets/mannequin.glb` prend sa place.)
 
 1. Crée ton avatar à partir de tes photos sur **Avaturn** (avaturn.me) ou **MetaPerson** (metaperson.avatarsdk.com).
 2. Exporte-le au format **GLB** (corps entier, avec squelette).
 3. Renomme le fichier `avatar.glb` et place-le dans `assets/`.
 
-Le site reconnaît les squelettes Avaturn, MetaPerson, Ready Player Me et Mixamo.
+Le site reconnaît les squelettes Avaturn, MetaPerson, Mixamo, 3ds Max « Biped » et les anciens fichiers Ready Player Me
+(le service Ready Player Me a fermé en janvier 2026).
 S'il dépasse 25 Mo, compresse-le avant de l'envoyer sur GitHub (outil en ligne comme [gltf.report](https://gltf.report), compression Draco ou Meshopt : le site sait les lire).
 
 ---
@@ -159,10 +162,10 @@ La hauteur d'assise et la distance au dossier sont **détectées automatiquement
 | `bassin.bascule`, `dos.inclinaison` | avachi dans le canapé ↔ penché vers l'écran |
 | `tete.inclinaison`, `tete.rotation` | direction du regard |
 | `jambes.piedsAvant`, `piedsEcart`, `genouxEcart` | position des pieds et ouverture des genoux (cuisses et genoux suivent automatiquement) |
-| `manette.avant`, `hauteur`, `ecartMains` | position de la manette (bras et avant-bras suivent automatiquement) |
+| `manette.avant`, `hauteur`, `inclinaison` | position et inclinaison de la manette (bras, mains et doigts viennent la saisir) |
 | `coudes.ecart`, `coudes.arriere` | coudes plus ou moins écartés du corps |
-| `mains.torsion`, `mains.versInterieur`, `avantBras.torsion` | orientation des poignets et des paumes |
-| `doigts.flexion`, `doigts.pouce` | doigts plus ou moins refermés sur la manette |
+| `prise.ecartPaume`, `versInterieur`, `versHaut`, `paumeHaut` | position des mains sur les poignées de la manette |
+| `prise.doigts`, `prise.index`, `prise.pouce` | doigts plus ou moins refermés (index sur les gâchettes, pouces sur les joysticks) |
 | `animation` | respiration, mouvements de tête, pouces, sursauts (mettre `0` ou `false` pour couper) |
 
 Si ton fichier GLB contient des animations, un menu **Animation** apparaît en haut à droite pour les essayer.
@@ -289,5 +292,6 @@ Le titre et la description affichés par Google et lors d'un partage de lien son
 - Fauteuil « Sheen Chair » © 2020 Wayfair LLC — CC0
 - (modèles issus des [Khronos glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets), optimisés pour le web)
 - Éclairage HDRI : Poly Haven (CC0), via [pmndrs/assets](https://github.com/pmndrs/assets) ; reliefs de matières : pmndrs/assets (CC0)
+- Avatar : bibliothèque [Microsoft Rocketbox](https://github.com/microsoft/Microsoft-Rocketbox) © 2020 Microsoft — licence MIT (tenue retouchée pour ce projet)
 - Mannequin « X Bot » : Adobe Mixamo
 - Parquet, enduit, chêne et tapis : textures générées pour ce projet · Moteur 3D : [Three.js](https://threejs.org)
