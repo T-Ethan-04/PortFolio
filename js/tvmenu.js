@@ -13,6 +13,7 @@
 import * as THREE from 'three';
 import { iconPath } from './icons.js';
 import { hasPage, pageParagraphs, elementLink } from './content.js';
+import { maintenant } from './eclairage.js';
 
 const W = 1920, H = 1080;
 const FONT = 'Inter, system-ui, -apple-system, Segoe UI, sans-serif';
@@ -137,7 +138,7 @@ export class TVMenu {
     g.restore();
     g.textAlign = 'left'; g.fillStyle = '#fff'; g.font = font(600, 28); g.fillText(this.profil.nom, 156, 81);
     // barre d'état : manette, wifi, heure
-    const d = new Date();
+    const d = maintenant();   // heure réelle (ou heure forcée avec ?heure=)
     g.textAlign = 'right'; g.fillStyle = '#d7e3ff'; g.font = font(500, 28);
     g.fillText(d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), 1830, 81);
     g.textAlign = 'left';

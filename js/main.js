@@ -7,6 +7,8 @@
 //    ?auto=0                        désactive la baisse automatique
 //    ?intro=0                       saute l'intro
 //    ?pose                          fige l'animation de l'avatar
+//    ?heure=12 · ?heure=23 · ?heure=7h30   force l'heure de l'éclairage
+//    ?cycle=60                      fait défiler une journée en 60 s
 // =====================================================================
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -21,6 +23,7 @@ import { createGLTFLoader, loadAvatarGLTF, createAvatar } from './avatar.js';
 import { TVMenu } from './tvmenu.js';
 import { UISound } from './sound.js';
 import { createCinematicPass, createSanitizePass } from './effects.js';
+import { creerEclairage } from './eclairage.js';
 
 // ---------------------------------------------------------------------
 //  Réglages
@@ -133,6 +136,7 @@ async function main() {
   room = buildRoom(renderer, menu.material);
   room.setAmbience(menu.section ? menu.section.couleurs[0] : '#3d8bff');
   const { scene } = room;
+  const eclairage = creerEclairage(room, renderer);   // lumière selon l'heure du visiteur
   document.fonts && document.fonts.ready.then(() => { menu.dirty = true; });
   setInterval(() => { menu.dirty = true; }, 30000);   // horloge
   progress.base = 1; showProgress('Chargement de l\'avatar');
@@ -408,6 +412,7 @@ async function main() {
     const raw = clock.getDelta(), dt = Math.min(raw, 0.1), t = clock.elapsedTime;
     avatar.update(dt, t);
     menu.update(dt);
+    eclairage.update(dt);
     room.update(dt, t);
     if (intro) updateIntro(dt);
     else if (tween) {
@@ -435,7 +440,9 @@ async function main() {
 
   hideLoader();
   window.__portfolio = {
-    scene, camera, avatar, menu, renderer, room, sound, applyQuality,
+    scene, camera, avatar, menu, renderer, room, sound, applyQuality, eclairage,
+    /** Change l'heure de l'éclairage (ex. 19.5 ou "7h30") ; null = heure réelle. */
+    heure: h => eclairage.heure(h),
     get mode() { return mode; }, get quality() { return quality; }, enterTV, leaveTV, endIntro,
     /** Débogage : place la caméra librement (console du navigateur). */
     vue(pos, tgt) { mode = 'debug'; intro = null; camera.position.set(...pos); controls.target.set(...tgt); camera.lookAt(controls.target); },

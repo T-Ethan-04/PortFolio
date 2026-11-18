@@ -13,6 +13,7 @@ Une **version simple** (`simple.html`), lisible partout et bien référencée, e
 /js/tvmenu.js        le menu animé affiché sur la télé
 /js/sound.js         les sons d'interface (synthétisés, aucun fichier audio)
 /js/effects.js       le rendu « cinéma » (vignettage, grain)
+/js/eclairage.js     la lumière selon l'heure (réglages dans l'objet ECLAIRAGE)
 /js/content.js       lecture de content.json (partagé avec simple.html)
 /js/icons.js         les icônes des sections
 /assets/             ton avatar, le CV, les modèles 3D, textures, éclairage, images
@@ -190,10 +191,28 @@ Ressources gratuites : [Poly Haven](https://polyhaven.com) (HDRI `.hdr`, texture
 
 ---
 
-## 7. Qualité, performance et accessibilité
+## 7. L'éclairage suit l'heure du visiteur
+
+La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur (aucun service externe) :
+
+| Heure | Ambiance |
+|-------|----------|
+| 21 h – 6 h | nuit : ciel bleu nuit, clair de lune bleuté, lampes allumées, la lueur de la télé éclaire l'avatar |
+| 6 h – 8 h | aube : ciel orange et rose, soleil rasant et chaud par la fenêtre, les lampes s'éteignent peu à peu |
+| 8 h – 18 h | jour : ciel bleu, soleil franc par la fenêtre avec des ombres nettes, lampes éteintes (maximum à 12 h) |
+| 18 h – 21 h | crépuscule : ciel orange puis violet, lumière dorée et basse, les lampes se rallument peu à peu |
+
+- L'heure est relue chaque minute et tout change en douceur. L'écran de la télé reste lisible à toute heure.
+- **Tester une heure** : ajoute `?heure=12`, `?heure=23` ou `?heure=7h30` à l'adresse (ex. `https://ethan-tosic.vercel.app/?heure=7h30`).
+  `?cycle=60` fait défiler une journée entière en 60 secondes. Dans la console (F12) : `__portfolio.heure(19.5)`.
+- **Tous les réglages** (horaires, couleurs, intensités, course du soleil) sont dans l'objet **`ECLAIRAGE`**, en haut de `js/eclairage.js`.
+
+---
+
+## 8. Qualité, performance et accessibilité
 
 - **3 niveaux de qualité** (`haute`, `moyenne`, `basse`) : ombres, occlusion ambiante, halo lumineux, rendu cinéma, poussière dans la lumière et résolution. Les téléphones démarrent en `moyenne` ; si les images par seconde chutent, la qualité baisse toute seule, puis la version simple est proposée.
-- Paramètres utiles dans l'adresse : `?qualite=basse`, `?auto=0` (pas de baisse automatique), `?intro=0` (sans intro), `?pose` (animation figée).
+- Paramètres utiles dans l'adresse : `?qualite=basse`, `?auto=0` (pas de baisse automatique), `?intro=0` (sans intro), `?pose` (animation figée), `?heure=12` (heure de l'éclairage).
 - **Sans WebGL** (vieux appareil) : redirection automatique vers `simple.html`.
 - **Clavier** : `Entrée` ouvre la télé · `← →` changent de section · `↑ ↓` parcourent le contenu · `Entrée` ouvre un élément · `Échap` revient en arrière · `M` coupe ou remet le son. L'intro se passe avec `Échap` ou le bouton *Passer*.
 - Le contenu de la télé est lu par les lecteurs d'écran, le lien **Version simple** est toujours visible, et les animations sont réduites si le visiteur l'a demandé dans son système.
@@ -201,14 +220,14 @@ Ressources gratuites : [Poly Haven](https://polyhaven.com) (HDRI `.hdr`, texture
 
 ---
 
-## 8. Référencement (Google, LinkedIn)
+## 9. Référencement (Google, LinkedIn)
 
 Le titre et la description affichés par Google et lors d'un partage de lien sont dans les balises `<title>` et `<meta name="description">` au début de `index.html` et `simple.html`. Ce sont les seules lignes de HTML que tu pourrais vouloir changer (par exemple si ta recherche d'alternance évolue).
 `simple.html` est la page la mieux lue par les moteurs de recherche : c'est elle qu'il vaut mieux envoyer aux recruteurs pressés.
 
 ---
 
-## 9. Dépannage
+## 10. Dépannage
 
 | Problème | Solution |
 |----------|----------|

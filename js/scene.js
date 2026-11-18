@@ -12,6 +12,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { creerVue } from './eclairage.js';
 
 // ---------------------------------------------------------------------
 //  RESSOURCES OPTIONNELLES — chargées si le fichier existe.
@@ -122,15 +123,6 @@ export function buildRoom(renderer, screenMaterial) {
     g.strokeStyle = 'rgba(120,96,70,.45)'; g.lineWidth = 10; g.strokeRect(46, 46, w - 92, h - 92);
     g.lineWidth = 3; g.strokeRect(70, 70, w - 140, h - 140);
   });
-  const cityTex = canvasTex(512, 640, (g, w, h) => {
-    const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#0a1024'); sky.addColorStop(.7, '#1d2448'); sky.addColorStop(1, '#3a2c4a');
-    g.fillStyle = sky; g.fillRect(0, 0, w, h);
-    let x = 0; while (x < w) {
-      const bw = rnd(30, 80), bh = rnd(120, 380); g.fillStyle = `hsl(230,25%,${rnd(8, 14)}%)`; g.fillRect(x, h - bh, bw, bh);
-      for (let yy = h - bh + 8; yy < h - 6; yy += 12) for (let xx = x + 5; xx < x + bw - 6; xx += 10) if (Math.random() < .35) { g.fillStyle = `rgba(255,${rnd(190, 230) | 0},140,${rnd(.4, .95)})`; g.fillRect(xx, yy, 4, 5); }
-      x += bw + rnd(2, 10);
-    }
-  }, 1, 1);
   const artTex = canvasTex(512, 640, (g, w, h) => {
     g.fillStyle = '#efe7da'; g.fillRect(0, 0, w, h);
     g.fillStyle = '#c96f4a'; g.beginPath(); g.arc(w * .42, h * .38, 120, 0, 7); g.fill();
@@ -207,9 +199,10 @@ export function buildRoom(renderer, screenMaterial) {
   add(new THREE.BoxGeometry(2.9, 2.75, 0.02), M.dark, 0, 1.375, -3.485, slats, false);
   for (let i = 0; i < 29; i++) add(new THREE.BoxGeometry(0.06, 2.75, 0.035), M.slat, -1.4 + i * 0.1, 1.375, -3.46, slats, false);
 
-  // fenêtre avec ville de nuit
+  // fenêtre : la ville change selon l'heure (voir eclairage.js)
+  const vue = creerVue(maxAniso);
   const win = new THREE.Group(); win.position.set(-3.99, 1.55, -0.6); win.rotation.y = Math.PI / 2; scene.add(win);
-  add(new THREE.PlaneGeometry(1.5, 1.9), new THREE.MeshBasicMaterial({ map: cityTex }), 0, 0, 0.005, win, false);
+  add(new THREE.PlaneGeometry(1.5, 1.9), vue.material, 0, 0, 0.005, win, false);
   [[0, 0.97, 1.6, 0.06], [0, -0.97, 1.6, 0.06], [-0.77, 0, 0.06, 1.98], [0.77, 0, 0.06, 1.98], [0, 0, 0.035, 1.9], [0, 0.1, 1.5, 0.035]]
     .forEach(([x, y, w, h]) => add(new THREE.BoxGeometry(w, h, 0.06), M.metal, x, y, 0.03, win, false));
   add(new THREE.PlaneGeometry(0.7, 2.6), new THREE.MeshStandardMaterial({ color: '#e8e2d6', roughness: 1, transparent: true, opacity: 0.85, side: THREE.DoubleSide }), 1.05, -0.2, 0.12, win, false);
@@ -292,13 +285,19 @@ export function buildRoom(renderer, screenMaterial) {
   spot.castShadow = true; spot.shadow.mapSize.set(2048, 2048); spot.shadow.bias = -0.0004; spot.shadow.normalBias = 0.02; spot.shadow.radius = 6;
   const glow = new THREE.PointLight('#ffb070', 1.4, 3, 2); glow.position.set(-1.2, 2.05, -0.7); lamp.add(glow);
 
-  // clair de lune par la fenêtre + ambiance douce
-  const moon = new THREE.DirectionalLight('#8ea2ff', 0.55); moon.position.set(-6, 3.2, -0.6); moon.target.position.set(0, 0.4, 0.6);
+  // lumière du ciel : la lune la nuit, le soleil le jour (position et couleur pilotées par eclairage.js)
+  const moon = new THREE.DirectionalLight('#8ea2ff', 0.55); moon.position.set(-6, 3.2, -0.6); moon.target.position.set(0, 1.5, 0.5);
   moon.castShadow = true; moon.shadow.mapSize.set(2048, 2048);
-  Object.assign(moon.shadow.camera, { left: -5, right: 5, top: 4, bottom: -4, far: 15 });
+  Object.assign(moon.shadow.camera, { left: -6.6, right: 6.6, top: 6.6, bottom: -6.6, near: 1, far: 32 });
   moon.shadow.bias = -0.0005; moon.shadow.normalBias = 0.03; moon.shadow.radius = 4;
   scene.add(moon, moon.target);
-  scene.add(new THREE.HemisphereLight('#aab6ff', '#3a2a20', 0.22));
+  const hemi = new THREE.HemisphereLight('#aab6ff', '#3a2a20', 0.22);
+  scene.add(hemi);
+
+  // enveloppe invisible qui ne laisse passer le soleil que par la fenêtre
+  // (la nuit elle est désactivée : la lune garde son rendu d'origine)
+  const enveloppeSoleil = buildSunShell({ x: -4, z0: -1.35, z1: 0.15, y0: 0.6, y1: 2.5, mullions: [{ z: -0.6 }], transoms: [{ y: 1.65 }] });
+  scene.add(enveloppeSoleil);
   // applique murale hors champ (derrière la caméra) : éclaire doucement le dos du canapé et de l'avatar
   const fill = new THREE.PointLight('#ffcf9e', 5, 9, 2); fill.position.set(2.3, 2.3, 3.7); scene.add(fill);
 
@@ -321,7 +320,12 @@ export function buildRoom(renderer, screenMaterial) {
     seatRoot: sofa,            // objet sur lequel l'avatar s'assoit (remplacé par le GLB s'il existe)
     shadowLights: [spot, moon],
     atmosphere,
-    noAO: atmosphere.noAO,     // objets ignorés par l'occlusion ambiante
+    noAO: [...atmosphere.noAO, enveloppeSoleil],   // objets ignorés par l'occlusion ambiante
+    // éléments pilotés par eclairage.js (lumière selon l'heure)
+    lumieres: { ciel: moon, hemi, lampadaire: spot, halo: glow, applique: fill, tele: tvLight, led },
+    ampoule: M.warm,
+    vue,
+    enveloppeSoleil,
     envListeners: [],
     /** Rappel appelé quand l'environnement change (HDRI chargé). */
     onEnvironment(cb) { this.envListeners.push(cb); cb(scene.environment); },
@@ -445,7 +449,42 @@ function buildAtmosphere(apex, aim, angle) {
     update(t) { dustMat.uniforms.uTime.value = t; },
     setPixelRatio(pr) { dustMat.uniforms.uPixelRatio.value = pr; },
     setEnabled(on) { group.visible = on; },
+    /** Suit l'allumage de la lampe (0 = éteinte, 1 = allumée). */
+    setLevel(k) {
+      dustMat.uniforms.uIntensity.value = 0.85 * k;
+      coneMat.uniforms.uIntensity.value = 0.07 * k;
+      dust.visible = cone.visible = k > 0.002;
+    },
   };
+}
+
+// ---------------------------------------------------------------------
+//  Enveloppe invisible du salon : elle ne fait que porter ombre, pour que
+//  le soleil n'entre que par l'ouverture de la fenêtre (mur gauche).
+// ---------------------------------------------------------------------
+function buildSunShell({ x, z0, z1, y0, y1, mullions = [], transoms = [] }) {
+  const group = new THREE.Group(); group.name = 'enveloppeSoleil';
+  const mat = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
+  const R = { x0: -4, x1: 4, z0: -3.5, z1: 4.5, h: 3 }, m = 0.3, t = 0.12;
+  const box = (sx, sy, sz, px, py, pz) => {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
+    b.position.set(px, py, pz); b.castShadow = true; b.receiveShadow = false; group.add(b);
+  };
+  const zc = (R.z0 + R.z1) / 2, zl = R.z1 - R.z0 + 2 * m, xl = R.x1 - R.x0 + 2 * m, xw = x - t / 2 - 0.005;
+  // mur de la fenêtre, percé à l'emplacement de la vitre
+  box(t, y0 + m, zl, xw, (y0 - m) / 2, zc);
+  box(t, R.h + m - y1, zl, xw, (y1 + R.h + m) / 2, zc);
+  box(t, y1 - y0, z0 - (R.z0 - m), xw, (y0 + y1) / 2, (z0 + R.z0 - m) / 2);
+  box(t, y1 - y0, R.z1 + m - z1, xw, (y0 + y1) / 2, (z1 + R.z1 + m) / 2);
+  // montants et traverses de la fenêtre (ombres fines au sol)
+  for (const mu of mullions) box(0.06, y1 - y0, mu.largeur || 0.035, x + 0.03, (y0 + y1) / 2, mu.z);
+  for (const tr of transoms) box(0.06, tr.hauteur || 0.035, z1 - z0, x + 0.03, tr.y, (z0 + z1) / 2);
+  // plafond, mur de la télé, mur du fond
+  box(xl, t, zl, 0, R.h + t / 2 + 0.01, zc);
+  box(xl, R.h + 2 * m, t, 0, R.h / 2, R.z0 - t / 2 - 0.01);
+  box(xl, R.h + 2 * m, t, 0, R.h / 2, R.z1 + t / 2 + 0.01);
+  group.visible = false;
+  return group;
 }
 
 // ---------------------------------------------------------------------
