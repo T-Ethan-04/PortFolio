@@ -223,12 +223,12 @@ export function buildRoom(renderer, screenMaterial) {
   //  BAIE VITRÉE + PAYSAGE
   // =================================================================
   const bzc = (BAIE.z0 + BAIE.z1) / 2, bl = BAIE.z1 - BAIE.z0, bh = BAIE.y1 - BAIE.y0, byc = (BAIE.y0 + BAIE.y1) / 2;
-  const xr = -4 - BAIE.profondeur / 2;
+  const xr = -4 - 0.003 - BAIE.profondeur / 2;   // 3 mm en retrait du mur : aucune face confondue avec lui (sinon ça scintille)
   // embrasure en chêne clair (le fil suit la longueur des planches)
-  planche(bl + 0.06, 0.03, BAIE.profondeur, M.oak, xr, BAIE.y1 + 0.015, bzc, Math.PI / 2, scene, false);
-  planche(bl + 0.06, 0.03, BAIE.profondeur, M.oak, xr, BAIE.y0 - 0.012, bzc, Math.PI / 2, scene, false);
+  planche(bl + 0.06, 0.03, BAIE.profondeur, M.oak, xr, BAIE.y1 + 0.015, bzc, Math.PI / 2, scene, true);
+  planche(bl + 0.06, 0.03, BAIE.profondeur, M.oak, xr, BAIE.y0 - 0.012, bzc, Math.PI / 2, scene, true);
   for (const z of [BAIE.z0 - 0.015, BAIE.z1 + 0.015]) {
-    const m = add(new THREE.BoxGeometry(bh, BAIE.profondeur, 0.03), M.oak, xr, byc, z, scene, false);
+    const m = add(new THREE.BoxGeometry(bh, BAIE.profondeur, 0.03), M.oak, xr, byc, z, scene, true);
     m.rotation.z = Math.PI / 2;
   }
   // menuiserie noire, vitre
@@ -389,7 +389,8 @@ export function buildRoom(renderer, screenMaterial) {
   const fill = new THREE.PointLight('#ffcf9e', 5, 9, 2); fill.position.set(2.3, 2.3, 3.7); scene.add(fill);
   // enveloppe invisible : ombre portée par les murs et le plafond, sauf à travers la baie
   const enveloppeSoleil = buildSunShell({
-    x: -4, z0: BAIE.z0, z1: BAIE.z1, y0: BAIE.y0, y1: BAIE.y1, epaisseur: BAIE.profondeur + 0.01,
+    // ouverture 2,5 cm plus large que la baie : ce sont les planches de l'embrasure qui découpent la lumière
+    x: -4, z0: BAIE.z0 - 0.025, z1: BAIE.z1 + 0.025, y0: BAIE.y0 - 0.025, y1: BAIE.y1 + 0.025, epaisseur: BAIE.profondeur + 0.01,
     mullions: [{ z: BAIE.meneau, largeur: 0.055 }],
   });
   scene.add(enveloppeSoleil);
