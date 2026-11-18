@@ -395,6 +395,35 @@ export function buildRoom(renderer, screenMaterial) {
   const glow = new THREE.PointLight('#ffb070', 1.4, 3, 2); glow.position.set(-1.2, 2.05, -0.7); lamp.add(glow);
 
   // =================================================================
+  //  TABLEAU (mur de la télé, à gauche) et sa liseuse en laiton
+  // =================================================================
+  const TABLEAU = { x: -2.55, y: 1.72, largeur: 0.88, rapport: 0.826 };     // rapport largeur / hauteur de la toile
+  const tH = TABLEAU.largeur / TABLEAU.rapport, tW = TABLEAU.largeur;
+  const tableau = new THREE.Group(); tableau.position.set(TABLEAU.x, TABLEAU.y, -3.5); scene.add(tableau);
+  const toileTex = new THREE.TextureLoader().load('assets/images/tableau.jpg');
+  toileTex.colorSpace = THREE.SRGBColorSpace; toileTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const chant = new THREE.MeshStandardMaterial({ color: '#2a1810', roughness: 0.9 });
+  const peinture = new THREE.MeshStandardMaterial({ map: toileTex, roughness: 0.62, bumpMap: toileTex, bumpScale: 0.25 });
+  add(new THREE.BoxGeometry(tW, tH, 0.028), [chant, chant, chant, chant, peinture, chant], 0, 0, 0.014 + 0.012, tableau);
+  // caisse américaine en noyer : 4 baguettes autour de la toile, avec un jour de 7 mm
+  const noyer = new THREE.MeshStandardMaterial({ color: '#3a271b', roughness: 0.5 });
+  const jour = 0.007, b = 0.018, prof = 0.046, W = tW + 2 * (jour + b), Hc = tH + 2 * (jour + b);
+  add(new THREE.BoxGeometry(W, b, prof), noyer, 0, (Hc - b) / 2, prof / 2, tableau);
+  add(new THREE.BoxGeometry(W, b, prof), noyer, 0, -(Hc - b) / 2, prof / 2, tableau);
+  add(new THREE.BoxGeometry(b, Hc - 2 * b, prof), noyer, (W - b) / 2, 0, prof / 2, tableau);
+  add(new THREE.BoxGeometry(b, Hc - 2 * b, prof), noyer, -(W - b) / 2, 0, prof / 2, tableau);
+  add(new THREE.BoxGeometry(W - 2 * b, Hc - 2 * b, 0.004), M.dark, 0, 0, 0.004, tableau, false);   // fond du jour
+  // liseuse : platine murale, bras, rampe en laiton avec sa bande lumineuse
+  const yL = Hc / 2 + 0.11, zL = 0.22;
+  add(rbox(0.07, 0.045, 0.02, 0.006, 2), M.brass, 0, yL + 0.02, 0.01, tableau);
+  { const bras = add(new THREE.CylinderGeometry(0.006, 0.006, zL, 12), M.brass, 0, yL + 0.02, zL / 2, tableau); bras.rotation.x = Math.PI / 2; }
+  { const rampe = add(new THREE.CylinderGeometry(0.018, 0.018, 0.46, 24), M.brass, 0, yL, zL, tableau); rampe.rotation.z = Math.PI / 2; }
+  add(new THREE.BoxGeometry(0.42, 0.004, 0.012), M.warm, 0, yL - 0.017, zL, tableau, false);
+  const lumiereTableau = new THREE.SpotLight('#ffcf9a', 4, 0, 1.05, 1, 2);
+  lumiereTableau.position.set(0, yL - 0.02, zL); tableau.add(lumiereTableau);
+  lumiereTableau.target.position.set(0, -0.35, 0); tableau.add(lumiereTableau.target);
+
+  // =================================================================
   //  LUMIÈRES DU CIEL ET D'AMBIANCE (pilotées par eclairage.js)
   // =================================================================
   // soleil le jour, lune la nuit : un seul projecteur, qui n'entre que par la baie
@@ -436,7 +465,7 @@ export function buildRoom(renderer, screenMaterial) {
     atmosphere,
     noAO: [...atmosphere.noAO, enveloppeSoleil, paysage, vitre],   // objets ignorés par l'occlusion ambiante
     // éléments pilotés par eclairage.js (lumière selon l'heure)
-    lumieres: { ciel: sky, hemi, lampadaire: spot, halo: glow, applique: fill, tele: tvLight, led, bandeau },
+    lumieres: { ciel: sky, hemi, lampadaire: spot, halo: glow, applique: fill, tableau: lumiereTableau, tele: tvLight, led, bandeau },
     ampoule: M.warm,
     bandeau: { materiau: M.ledStrip },
     vue,

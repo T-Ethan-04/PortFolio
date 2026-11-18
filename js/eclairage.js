@@ -114,7 +114,7 @@ export const ECLAIRAGE = {
   // ------------------------------------------------------------------
   //  4. DIVERS
   // ------------------------------------------------------------------
-  lampes: { lampadaire: 20, halo: 1.4, applique: 5 },   // puissance quand lampes = 1
+  lampes: { lampadaire: 20, halo: 1.4, applique: 5, tableau: 4 },   // puissance quand lampes = 1
   bandeauLed: 25,       // puissance du bandeau LED quand bandeau = 1
   sansOmbres: 0.45,     // qualité basse (sans ombres) : soleil et lune traversent les murs, on les atténue
   transition: 3,        // secondes pour glisser vers une nouvelle heure
@@ -437,6 +437,7 @@ export function creerEclairage(room, renderer) {
     L.lampadaire.intensity = P.lampadaire * k;
     L.halo.intensity = P.halo * k;
     L.applique.intensity = P.applique * k;
+    if (L.tableau) L.tableau.intensity = P.tableau * (0.35 + 0.65 * k);   // la liseuse du tableau reste un peu allumée le jour
     room.ampoule.color.lerpColors(ampouleEteinte, ampouleAllumee, k);
     room.atmosphere.setLevel(k);
 
