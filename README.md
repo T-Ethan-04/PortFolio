@@ -171,15 +171,26 @@ Si l'avatar n'apparaît pas alors que `avatar.glb` est bien présent, ouvre la c
 
 ## 6. Le décor 3D (déjà inclus)
 
+Le salon : grande **baie vitrée** sur une forêt de sapins dans la brume, mur de la télé en **enduit** (béton ciré),
+**panneau à tasseaux** en noyer avec trois étagères noires, **meuble TV suspendu** (façades anthracite, plateau en chêne,
+niche avec ampli), **bandeau LED** au plafond, la **console** debout sur le meuble, la **lampe arc** en laiton,
+un grand tapis, une table basse noire, un pouf et un fauteuil.
+
 | Fichier | Contenu |
 |---------|---------|
-| `assets/models/canape.glb` | canapé en velours incurvé (remplace le canapé dessiné en code) |
-| `assets/models/fauteuil.glb` | fauteuil en velours bleu canard, près de la lampe |
-| `assets/models/plante.glb` | plante en pot, à côté du canapé |
-| `assets/textures/parquet/` | parquet en chêne : `couleur.jpg`, `rugosite.jpg`, `normale.jpg` (relief) |
+| `assets/models/canape.glb` | canapé en velours incurvé, recoloré en gris anthracite (remplace le canapé dessiné en code) |
+| `assets/models/fauteuil.glb` | fauteuil en velours, recoloré en beige, près de la lampe |
+| `assets/models/plante.glb` | plante en pot, à côté de la baie |
+| `assets/textures/parquet/` | parquet en chêne clair : `couleur.jpg`, `rugosite.jpg`, `normale.jpg` (relief) |
+| `assets/textures/enduit/` | enduit du mur de la télé (couleur, brillance, relief) |
+| `assets/textures/chene/` | chêne clair du plateau et de l'embrasure de la baie |
+| `assets/textures/tapis/` | laine du tapis |
 | `assets/textures/mur/`, `bois/`, `tissu/` | reliefs fins du plâtre, du bois et du tissu (`normale.jpg`) |
 | `assets/hdri/salon.exr` | éclairage d'ambiance et reflets réalistes |
 | `assets/images/apercu.jpg` | image du salon (version simple et partage du lien) |
+
+Les couleurs des modèles se changent dans `"teintes"` (dans `OPTIONAL_ASSETS`, en haut de `js/scene.js`).
+La forêt vue par la baie est dessinée en code et change avec l'heure (voir la partie 7).
 
 Tout est **facultatif** : si un fichier manque, la version dessinée en code est utilisée.
 Pour changer de décor, remplace un fichier en gardant son nom, ou modifie `OPTIONAL_ASSETS` en haut de `js/scene.js` :
@@ -197,10 +208,10 @@ La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur 
 
 | Heure | Ambiance |
 |-------|----------|
-| 21 h – 6 h | nuit : ciel bleu nuit, clair de lune bleuté, lampes allumées, la lueur de la télé éclaire l'avatar |
-| 6 h – 8 h | aube : ciel orange et rose, soleil rasant et chaud par la fenêtre, les lampes s'éteignent peu à peu |
-| 8 h – 18 h | jour : ciel bleu, soleil franc par la fenêtre avec des ombres nettes, lampes éteintes (maximum à 12 h) |
-| 18 h – 21 h | crépuscule : ciel orange puis violet, lumière dorée et basse, les lampes se rallument peu à peu |
+| 21 h – 6 h | nuit : forêt sombre sous les étoiles, clair de lune bleuté par la baie, lampes et bandeau LED allumés, la lueur de la télé éclaire l'avatar |
+| 6 h – 8 h | aube : ciel orange et rose, soleil rasant et chaud par la baie (taches de lumière sur le mur de la télé), les lampes s'éteignent peu à peu |
+| 8 h – 18 h | jour : forêt dans la brume, soleil franc par la baie avec des ombres nettes, lampes éteintes (maximum à 12 h) |
+| 18 h – 21 h | crépuscule : ciel orange puis violet, lumière dorée et basse sur le canapé, les lampes se rallument peu à peu |
 
 - L'heure est relue chaque minute et tout change en douceur. L'écran de la télé reste lisible à toute heure.
 - **Tester une heure** : ajoute `?heure=12`, `?heure=23` ou `?heure=7h30` à l'adresse (ex. `https://ethan-tosic.vercel.app/?heure=7h30`).
@@ -216,7 +227,7 @@ La lumière du salon suit l'heure de l'ordinateur ou du téléphone du visiteur 
 - **Sans WebGL** (vieux appareil) : redirection automatique vers `simple.html`.
 - **Clavier** : `Entrée` ouvre la télé · `← →` changent de section · `↑ ↓` parcourent le contenu · `Entrée` ouvre un élément · `Échap` revient en arrière · `M` coupe ou remet le son. L'intro se passe avec `Échap` ou le bouton *Passer*.
 - Le contenu de la télé est lu par les lecteurs d'écran, le lien **Version simple** est toujours visible, et les animations sont réduites si le visiteur l'a demandé dans son système.
-- Poids : environ 5 Mo hors avatar (décor 3D compris).
+- Poids : environ 6 Mo hors avatar (décor 3D compris).
 
 ---
 
@@ -249,4 +260,4 @@ Le titre et la description affichés par Google et lors d'un partage de lien son
 - (modèles issus des [Khronos glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets), optimisés pour le web)
 - Éclairage HDRI : Poly Haven (CC0), via [pmndrs/assets](https://github.com/pmndrs/assets) ; reliefs de matières : pmndrs/assets (CC0)
 - Mannequin « X Bot » : Adobe Mixamo
-- Parquet : texture générée pour ce projet · Moteur 3D : [Three.js](https://threejs.org)
+- Parquet, enduit, chêne et tapis : textures générées pour ce projet · Moteur 3D : [Three.js](https://threejs.org)

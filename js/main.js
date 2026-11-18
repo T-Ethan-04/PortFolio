@@ -412,7 +412,7 @@ async function main() {
     const raw = clock.getDelta(), dt = Math.min(raw, 0.1), t = clock.elapsedTime;
     avatar.update(dt, t);
     menu.update(dt);
-    eclairage.update(dt);
+    eclairage.update(dt, t);
     room.update(dt, t);
     if (intro) updateIntro(dt);
     else if (tween) {

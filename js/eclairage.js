@@ -35,66 +35,67 @@ export const ECLAIRAGE = {
 
   // ------------------------------------------------------------------
   //  2. AMBIANCES — couleurs (#rrggbb) et intensités.
-  //   ciel      : ce qu'on voit par la fenêtre (haut, milieu, horizon du ciel,
-  //               couleur des immeubles, part des fenêtres allumées de 0 à 1,
-  //               reflet du ciel sur les vitres, étoiles de 0 à 1, luminosité)
-  //   soleil    : lumière qui entre par la fenêtre le jour
-  //   lune      : lumière bleutée de la nuit
+  //   ciel      : ce qu'on voit par la baie vitrée : ciel (haut, milieu, horizon),
+  //               forêt au loin, à mi-distance et proche, brume (couleur et
+  //               force de 0 à 1), étoiles (0 à 1), luminosité générale
+  //   soleil    : lumière qui entre par la baie le jour
+  //   lune      : lumière bleutée qui entre par la baie la nuit
   //   ambiance  : lumière diffuse de la pièce (couleur venant du haut, du sol,
   //               intensité) et force des reflets (1 = réglage d'origine)
-  //   lampes    : 0 = éteintes, 1 = allumées (lampadaire, applique, ampoule)
+  //   lampes    : 0 = éteintes, 1 = allumées (lampe arc, applique, ampoule)
+  //   bandeau   : bandeau LED du plafond, de 0 à 1
   //   tele      : lueur de l'écran sur la pièce et sur l'avatar
-  //   retroeclairage : bande lumineuse derrière la télé
+  //   retroeclairage : lumière derrière la télé
   // ------------------------------------------------------------------
   ambiances: {
     nuit: {
-      ciel: { haut: '#0a1024', milieu: '#1d2448', horizon: '#3a2c4a', immeubles: '#151723', fenetresAllumees: 0.35, vitres: 0, etoiles: 0.7, luminosite: 1 },
+      ciel: { haut: '#04060d', milieu: '#0a1222', horizon: '#18233c', loin: '#141c31', moyen: '#0b111d', pres: '#05080d', brume: '#1e2942', brumeForce: 0.45, etoiles: 1, luminosite: 1 },
       soleil: { couleur: '#ffffff', intensite: 0 },
-      lune: { couleur: '#8ea2ff', intensite: 0.55 },
-      ambiance: { couleurCiel: '#aab6ff', couleurSol: '#3a2a20', intensite: 0.22, reflets: 1 },
-      lampes: 1, tele: 4.2, retroeclairage: 14,
+      lune: { couleur: '#8ea8ff', intensite: 1.6 },
+      ambiance: { couleurCiel: '#9aa8e0', couleurSol: '#3a2e26', intensite: 0.3, reflets: 0.9 },
+      lampes: 1, bandeau: 1, tele: 4.2, retroeclairage: 14,
     },
     aube: {
-      ciel: { haut: '#4f6299', milieu: '#d88d9a', horizon: '#ffae6b', immeubles: '#2b2a40', fenetresAllumees: 0.18, vitres: 0.25, etoiles: 0, luminosite: 1.25 },
-      soleil: { couleur: '#ffa970', intensite: 6 },
-      lune: { couleur: '#8ea2ff', intensite: 0 },
-      ambiance: { couleurCiel: '#c9b4d4', couleurSol: '#6b4a3a', intensite: 0.9, reflets: 1.5 },
-      lampes: 0.45, tele: 3.6, retroeclairage: 12,
+      ciel: { haut: '#56679a', milieu: '#c98d9e', horizon: '#ffb27a', loin: '#8e7a92', moyen: '#4a4658', pres: '#1d1f26', brume: '#eab9aa', brumeForce: 0.7, etoiles: 0, luminosite: 1.25 },
+      soleil: { couleur: '#ffad73', intensite: 7 },
+      lune: { couleur: '#8ea8ff', intensite: 0 },
+      ambiance: { couleurCiel: '#c7b8d4', couleurSol: '#6b5444', intensite: 0.9, reflets: 1.5 },
+      lampes: 0.45, bandeau: 0.6, tele: 3.6, retroeclairage: 12,
     },
     matin: {
-      ciel: { haut: '#5f9be0', milieu: '#a8cbee', horizon: '#f2e0c6', immeubles: '#7c8699', fenetresAllumees: 0.05, vitres: 0.5, etoiles: 0, luminosite: 1.6 },
-      soleil: { couleur: '#ffe3c4', intensite: 8 },
-      lune: { couleur: '#8ea2ff', intensite: 0 },
-      ambiance: { couleurCiel: '#dde7ff', couleurSol: '#a08a76', intensite: 1.7, reflets: 2.2 },
-      lampes: 0, tele: 3.2, retroeclairage: 9,
+      ciel: { haut: '#7fa2c6', milieu: '#b4c6d3', horizon: '#e6ddd0', loin: '#8f9ea6', moyen: '#41544a', pres: '#1b281f', brume: '#e2e5e4', brumeForce: 0.7, etoiles: 0, luminosite: 1.5 },
+      soleil: { couleur: '#ffe2c2', intensite: 9 },
+      lune: { couleur: '#8ea8ff', intensite: 0 },
+      ambiance: { couleurCiel: '#dde6f5', couleurSol: '#a08a76', intensite: 1.6, reflets: 2.0 },
+      lampes: 0, bandeau: 0.3, tele: 3.2, retroeclairage: 9,
     },
     midi: {
-      ciel: { haut: '#3f86e6', milieu: '#86bcf0', horizon: '#d6e9fb', immeubles: '#97a2b6', fenetresAllumees: 0.02, vitres: 0.55, etoiles: 0, luminosite: 1.9 },
-      soleil: { couleur: '#fff6ea', intensite: 10 },
-      lune: { couleur: '#8ea2ff', intensite: 0 },
-      ambiance: { couleurCiel: '#e6efff', couleurSol: '#b09a86', intensite: 2.1, reflets: 2.6 },
-      lampes: 0, tele: 3.2, retroeclairage: 8,
+      ciel: { haut: '#6a98c6', milieu: '#a7c0d2', horizon: '#dde5e8', loin: '#8ea2ab', moyen: '#435a4b', pres: '#1a2a20', brume: '#e8eced', brumeForce: 0.55, etoiles: 0, luminosite: 1.75 },
+      soleil: { couleur: '#fff4e6', intensite: 11 },
+      lune: { couleur: '#8ea8ff', intensite: 0 },
+      ambiance: { couleurCiel: '#e6eefb', couleurSol: '#b09a86', intensite: 2.0, reflets: 2.4 },
+      lampes: 0, bandeau: 0.25, tele: 3.2, retroeclairage: 8,
     },
     finDeJournee: {
-      ciel: { haut: '#5486cc', milieu: '#a3bfdf', horizon: '#f0d0a2', immeubles: '#78808f', fenetresAllumees: 0.06, vitres: 0.5, etoiles: 0, luminosite: 1.55 },
-      soleil: { couleur: '#ffd9a8', intensite: 8 },
-      lune: { couleur: '#8ea2ff', intensite: 0 },
-      ambiance: { couleurCiel: '#e4e0ee', couleurSol: '#a08a76', intensite: 1.7, reflets: 2.2 },
-      lampes: 0, tele: 3.2, retroeclairage: 9,
+      ciel: { haut: '#7493bd', milieu: '#bfc3c9', horizon: '#efd3ae', loin: '#999a9e', moyen: '#465243', pres: '#1d261f', brume: '#e8dac6', brumeForce: 0.6, etoiles: 0, luminosite: 1.5 },
+      soleil: { couleur: '#ffd29a', intensite: 9 },
+      lune: { couleur: '#8ea8ff', intensite: 0 },
+      ambiance: { couleurCiel: '#e2dde8', couleurSol: '#a08a76', intensite: 1.5, reflets: 2.0 },
+      lampes: 0, bandeau: 0.35, tele: 3.2, retroeclairage: 9,
     },
     coucher: {
-      ciel: { haut: '#46578f', milieu: '#d9866a', horizon: '#ffb35c', immeubles: '#383350', fenetresAllumees: 0.16, vitres: 0.35, etoiles: 0, luminosite: 1.35 },
-      soleil: { couleur: '#ff9f55', intensite: 6.5 },
-      lune: { couleur: '#8ea2ff', intensite: 0 },
-      ambiance: { couleurCiel: '#dcb6a8', couleurSol: '#6b4a3a', intensite: 1.0, reflets: 1.6 },
-      lampes: 0.3, tele: 3.4, retroeclairage: 11,
+      ciel: { haut: '#4b5a8e', milieu: '#d4866a', horizon: '#ffb25a', loin: '#86697a', moyen: '#3c3a48', pres: '#191b21', brume: '#f0b088', brumeForce: 0.6, etoiles: 0, luminosite: 1.3 },
+      soleil: { couleur: '#ff9d52', intensite: 7.5 },
+      lune: { couleur: '#8ea8ff', intensite: 0 },
+      ambiance: { couleurCiel: '#dbb5a6', couleurSol: '#6b5444', intensite: 0.95, reflets: 1.5 },
+      lampes: 0.3, bandeau: 0.7, tele: 3.4, retroeclairage: 11,
     },
     heureBleue: {
-      ciel: { haut: '#1d1b48', milieu: '#583979', horizon: '#b65f7a', immeubles: '#1b1930', fenetresAllumees: 0.3, vitres: 0.1, etoiles: 0.25, luminosite: 1.05 },
+      ciel: { haut: '#1a1b45', milieu: '#523a74', horizon: '#a96077', loin: '#352f52', moyen: '#221f34', pres: '#100f1b', brume: '#6a5888', brumeForce: 0.5, etoiles: 0.3, luminosite: 1.05 },
       soleil: { couleur: '#ff9a6a', intensite: 0 },
-      lune: { couleur: '#8ea2ff', intensite: 0.3 },
-      ambiance: { couleurCiel: '#8c86c8', couleurSol: '#3a2a30', intensite: 0.45, reflets: 1.15 },
-      lampes: 0.75, tele: 3.8, retroeclairage: 13,
+      lune: { couleur: '#8ea8ff', intensite: 0.8 },
+      ambiance: { couleurCiel: '#8a84c4', couleurSol: '#3a2e30', intensite: 0.45, reflets: 1.1 },
+      lampes: 0.75, bandeau: 0.9, tele: 3.8, retroeclairage: 13,
     },
   },
 
@@ -114,7 +115,8 @@ export const ECLAIRAGE = {
   //  4. DIVERS
   // ------------------------------------------------------------------
   lampes: { lampadaire: 20, halo: 1.4, applique: 5 },   // puissance quand lampes = 1
-  sansOmbres: 0.45,     // qualité basse (sans ombres) : le soleil traverse les murs, on l'atténue
+  bandeauLed: 25,       // puissance du bandeau LED quand bandeau = 1
+  sansOmbres: 0.45,     // qualité basse (sans ombres) : soleil et lune traversent les murs, on les atténue
   transition: 3,        // secondes pour glisser vers une nouvelle heure
 };
 
@@ -162,69 +164,163 @@ export function maintenant() {
 }
 
 // =====================================================================
-//  Vue par la fenêtre : ville dessinée sur un canvas, couleurs selon l'heure
+//  Vue par la baie vitrée : forêt de sapins dans la brume.
+//  Les silhouettes (3 plans : loin, mi-distance, proche) sont dessinées une
+//  fois sur un canvas ; un shader les colore selon l'heure et fait dériver
+//  la brume. Soleil et lune apparaissent dans le ciel quand ils sont visibles.
 // =====================================================================
-export function creerVue(anisotropie = 4) {
-  const W = 512, H = 640;
+/**
+ * @param plan     panneau du paysage, face à la pièce : { x, z0, z1, y0, y1 } (mètres)
+ * @param fenetre  centre de la baie (pour placer soleil et lune) : { x, y, z }
+ * @param oeil     hauteur des yeux de la caméra (ligne d'horizon), en mètres
+ */
+export function creerVue({ plan, fenetre, oeil = 1.85, anisotropie = 4 }) {
+  const largeur = plan.z1 - plan.z0, hauteur = plan.y1 - plan.y0;
+  const W = 2048, H = Math.round(W * hauteur / largeur);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d');
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = anisotropie;
-  const material = new THREE.MeshBasicMaterial({ map: tex });
-
-  // silhouette de la ville, tirée une fois
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+  g.globalCompositeOperation = 'lighter';
+  const px = W / largeur;                                  // pixels par mètre
+  const yPx = y => (plan.y1 - y) * px;                     // altitude → ligne du canvas
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const immeubles = [], fenetres = [], etoiles = [];
-  for (let x = 0; x < W;) {
-    const bw = rnd(30, 80), bh = rnd(120, 380);
-    immeubles.push({ x, y: H - bh, w: bw, h: bh, teinte: rnd(0.73, 1.27) });
-    for (let yy = H - bh + 8; yy < H - 6; yy += 12)
-      for (let xx = x + 5; xx < x + bw - 6; xx += 10)
-        fenetres.push({ x: xx, y: yy, rang: Math.random(), vert: rnd(190, 230) | 0, alpha: rnd(0.4, 0.95) });
-    x += bw + rnd(2, 10);
-  }
-  for (let i = 0; i < 70; i++) etoiles.push({ x: Math.random() * W, y: Math.random() * H * 0.55, r: rnd(0.6, 1.5), a: rnd(0.3, 1) });
 
-  const rgb = {};
-  const css = (col, k = 1) => {
-    col.getRGB(rgb, THREE.SRGBColorSpace);
-    const f = v => Math.round(Math.min(1, Math.max(0, v * k)) * 255);
-    return `rgb(${f(rgb.r)},${f(rgb.g)},${f(rgb.b)})`;
+  // silhouette d'un sapin : tronc fin, branches en étages irréguliers, pointe effilée
+  function sapin(x, yBase, h, w) {
+    const etages = 9 + (Math.random() * 7 | 0), incl = rnd(-0.04, 0.04) * w;
+    const cote = s => {
+      const pts = [];
+      for (let i = 1; i <= etages; i++) {
+        const t = i / etages, y = yBase - h + h * Math.pow(t, 1.08) * 0.94;
+        const demi = w * 0.5 * Math.pow(t, 0.85) * rnd(0.7, 1.18);
+        const cx = x + incl * (1 - t);
+        pts.push([cx + s * demi, y + h * rnd(0.005, 0.03)]);                 // bout de branche (tombant)
+        if (i < etages) pts.push([cx + s * demi * rnd(0.25, 0.55), y - h * rnd(0.0, 0.025)]);
+      }
+      return pts;
+    };
+    const d = cote(1), gch = cote(-1).reverse();
+    g.beginPath(); g.moveTo(x + incl, yBase - h - h * 0.03);
+    for (const [a, b] of d) g.lineTo(a, b);
+    g.lineTo(x + w * 0.04, yBase + 3); g.lineTo(x - w * 0.04, yBase + 3);
+    for (const [a, b] of gch) g.lineTo(a, b);
+    g.closePath(); g.fill();
+  }
+  // un plan de forêt : relief (en mètres, selon u = 0..1) + rangées de sapins
+  function couche(couleur, relief, arbre) {
+    g.fillStyle = couleur;
+    const sol = u => relief(u) + arbre.h[0] * 0.3;   // sous les cimes : massif continu, sans trou
+    g.beginPath(); g.moveTo(0, H);
+    for (let x = 0; x <= W; x += 4) g.lineTo(x, yPx(sol(x / W)));
+    g.lineTo(W, H); g.closePath(); g.fill();
+    for (let r = arbre.rangees - 1; r >= 0; r--) {
+      for (let x = -60; x < W + 60;) {
+        const u = Math.min(1, Math.max(0, x / W)), base = relief(u) - r * arbre.decalage - rnd(0, arbre.enfoncement);
+        const k = r === 0 ? 1 : rnd(0.85, 1.15);
+        sapin(x, yPx(base), rnd(arbre.h[0], arbre.h[1]) * k * px, rnd(arbre.l[0], arbre.l[1]) * k * px);
+        x += rnd(arbre.pas[0], arbre.pas[1]) * px;
+      }
+    }
+  }
+  // u = 0 : côté du canapé (à gauche dans la baie) ; u = 1 : côté de la télé (à droite)
+  const pente = u => 0.5 - u;
+  const loin = u => 2.45 + 0.35 * Math.sin(u * 9 + 1) + 0.18 * Math.sin(u * 23 + 2) + 0.7 * pente(u);
+  const moyen = u => 1.35 + 0.25 * Math.sin(u * 7 + 0.5) + 0.12 * Math.sin(u * 19) + 1.3 * pente(u);
+  const proche = u => 0.0 + 0.3 * Math.sin(u * 5 + 1.3) + 0.15 * Math.sin(u * 13) + 1.6 * pente(u);
+  couche('rgb(255,0,0)', loin, { h: [0.22, 0.42], l: [0.09, 0.15], pas: [0.035, 0.07], enfoncement: 0.12, rangees: 1, decalage: 0 });
+  couche('rgb(0,255,0)', moyen, { h: [0.6, 1.1], l: [0.2, 0.32], pas: [0.08, 0.15], enfoncement: 0.25, rangees: 1, decalage: 0 });
+  couche('rgb(0,0,255)', proche, { h: [1.9, 3.3], l: [0.55, 0.9], pas: [0.22, 0.45], enfoncement: 0.5, rangees: 1, decalage: 0 });
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.NoColorSpace; tex.anisotropy = anisotropie;
+  const v = y => (y - plan.y0) / hauteur;
+  const uniforms = {
+    uMasque: { value: tex }, uTemps: { value: 0 }, uAspect: { value: largeur / hauteur },
+    uHorizonV: { value: v(oeil) }, uLoinV: { value: v(2.3) }, uMoyenV: { value: v(1.3) }, uProcheV: { value: v(0.2) },
+    uHaut: { value: new THREE.Color() }, uMilieu: { value: new THREE.Color() }, uHorizon: { value: new THREE.Color() },
+    uLoin: { value: new THREE.Color() }, uMoyen: { value: new THREE.Color() }, uPres: { value: new THREE.Color() },
+    uBrume: { value: new THREE.Color() }, uBrumeForce: { value: 0.5 }, uEtoiles: { value: 0 }, uLum: { value: 1 },
+    uSoleil: { value: new THREE.Color(0, 0, 0) }, uSoleilUV: { value: new THREE.Vector2(-1, -1) },
+    uLune: { value: new THREE.Color(0, 0, 0) }, uLuneUV: { value: new THREE.Vector2(-1, -1) },
   };
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */`
+      uniform sampler2D uMasque; uniform float uTemps, uAspect, uHorizonV, uLoinV, uMoyenV, uProcheV;
+      uniform vec3 uHaut, uMilieu, uHorizon, uLoin, uMoyen, uPres, uBrume, uSoleil, uLune;
+      uniform float uBrumeForce, uEtoiles, uLum; uniform vec2 uSoleilUV, uLuneUV;
+      varying vec2 vUv;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float bruit(vec2 p) {
+        vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+      }
+      float fbm(vec2 p) { float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * bruit(p); p *= 2.03; a *= 0.5; } return s; }
+      void main() {
+        vec2 uv = vUv;
+        // ciel
+        float t = clamp((uv.y - uHorizonV) / (1.0 - uHorizonV), 0.0, 1.0);
+        vec3 col = mix(uHorizon, uMilieu, smoothstep(0.0, 0.3, t));
+        col = mix(col, uHaut, smoothstep(0.25, 1.0, t));
+        // étoiles
+        vec2 gp = uv * vec2(uAspect * 80.0, 80.0); vec2 id = floor(gp); float h = hash(id);
+        float etoile = step(0.986, h) * smoothstep(0.3, 0.0, length(fract(gp) - 0.5));
+        col += vec3(0.85, 0.9, 1.0) * etoile * uEtoiles * (0.55 + 0.45 * sin(uTemps * (0.6 + h * 3.0) + h * 40.0)) * smoothstep(uHorizonV, uHorizonV + 0.12, uv.y);
+        // soleil et lune
+        vec2 ds = (uv - uSoleilUV) * vec2(uAspect, 1.0); float r2 = dot(ds, ds);
+        col += uSoleil * (exp(-r2 * 2500.0) * 2.5 + exp(-r2 * 60.0) * 0.45);
+        vec2 dl = (uv - uLuneUV) * vec2(uAspect, 1.0); float rl = length(dl);
+        col += uLune * (smoothstep(0.011, 0.009, rl) * 1.4 + exp(-rl * rl * 500.0) * 0.22);
+        // forêt et brume
+        vec4 m = texture2D(uMasque, uv);
+        float n1 = fbm(vec2(uv.x * uAspect * 1.6 + uTemps * 0.010, uv.y * 9.0));
+        float n2 = fbm(vec2(uv.x * uAspect * 2.4 - uTemps * 0.007, uv.y * 13.0 + 3.0));
+        float aiguilles = fbm(uv * vec2(uAspect * 90.0, 160.0));            // branches et aiguilles
+        float massif = fbm(uv * vec2(uAspect * 9.0, 14.0));
+        col = mix(col, mix(uLoin, uBrume, 0.2 + 0.35 * uBrumeForce), m.r);
+        float vallee = smoothstep(uMoyenV - 0.05, uMoyenV + 0.04, uv.y) * (1.0 - smoothstep(uLoinV, uLoinV + 0.07, uv.y));
+        col = mix(col, uBrume, uBrumeForce * vallee * (0.35 + 0.65 * smoothstep(0.3, 0.75, n1)));
+        float colonnes = fbm(vec2(uv.x * uAspect * 45.0, uv.y * 4.0));        // troncs et colonnes d'arbres
+        vec3 moyen = uMoyen * (0.75 + 0.5 * aiguilles) * (0.8 + 0.4 * colonnes);
+        col = mix(col, mix(moyen, uBrume, 0.42 * uBrumeForce), m.g);
+        float bas = smoothstep(uProcheV - 0.08, uProcheV + 0.05, uv.y) * (1.0 - smoothstep(uMoyenV - 0.02, uMoyenV + 0.06, uv.y));
+        col = mix(col, uBrume, uBrumeForce * bas * 0.8 * smoothstep(0.3, 0.8, n2));
+        vec3 pres = uPres * (0.55 + 0.9 * aiguilles) * (0.8 + 0.4 * massif) * (0.7 + 0.6 * colonnes);
+        pres *= 0.75 + 0.45 * smoothstep(uProcheV - 0.25, uProcheV + 0.3, uv.y);
+        col = mix(col, pres, m.b);
+        float pied = 1.0 - smoothstep(uProcheV - 0.3, uProcheV + 0.02, uv.y);
+        col = mix(col, uBrume, uBrumeForce * pied * 0.25 * smoothstep(0.45, 0.9, n2));
+        col = mix(col, uBrume, uBrumeForce * 0.03);
+        gl_FragColor = vec4(col * uLum, 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+  });
 
-  function dessiner(ciel) {
-    const sky = g.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, css(ciel.haut)); sky.addColorStop(0.7, css(ciel.milieu)); sky.addColorStop(1, css(ciel.horizon));
-    g.fillStyle = sky; g.fillRect(0, 0, W, H);
-    if (ciel.etoiles > 0.01) {
-      for (const e of etoiles) { g.fillStyle = `rgba(235,240,255,${(e.a * ciel.etoiles).toFixed(3)})`; g.beginPath(); g.arc(e.x, e.y, e.r, 0, 7); g.fill(); }
-    }
-    for (const b of immeubles) { g.fillStyle = css(ciel.immeubles, b.teinte); g.fillRect(b.x, b.y, b.w, b.h); }
-    if (ciel.vitres > 0.01) {           // vitres éteintes : elles reflètent le ciel
-      g.globalAlpha = ciel.vitres; g.fillStyle = css(ciel.milieu);
-      for (const f of fenetres) g.fillRect(f.x, f.y, 4, 5);
-      g.globalAlpha = 1;
-    }
-    for (const f of fenetres) {
-      if (f.rang >= ciel.fenetresAllumees) continue;
-      g.fillStyle = `rgba(255,${f.vert},140,${f.alpha.toFixed(2)})`; g.fillRect(f.x, f.y, 4, 5);
-    }
-    tex.needsUpdate = true;
-  }
-
-  let signature = '', dernier = -1e9;
+  // position dans le paysage d'une direction (vers le soleil ou la lune), vue depuis la baie
+  const vers = (dir, out) => {
+    if (dir.x > -0.02) return out.set(-1, -1);              // l'astre n'est pas du côté de la baie
+    const k = (plan.x - fenetre.x) / dir.x;
+    const z = fenetre.z + dir.z * k, y = fenetre.y + dir.y * k;
+    return out.set((plan.z1 - z) / largeur, (y - plan.y0) / hauteur);
+  };
   return {
     material,
-    /** Met la vue à jour (redessine seulement si quelque chose a vraiment changé). */
-    mettreAJour(ciel, forcer = false) {
-      material.color.setScalar(ciel.luminosite);
-      const s = [ciel.haut, ciel.milieu, ciel.horizon, ciel.immeubles].map(c => `${Math.round(c.r * 2000)},${Math.round(c.g * 2000)},${Math.round(c.b * 2000)}`).join('|')
-        + `|${Math.round(ciel.fenetresAllumees * 500)}|${Math.round(ciel.vitres * 200)}|${Math.round(ciel.etoiles * 200)}`;
-      const t = performance.now();
-      if (s === signature || (!forcer && t - dernier < 150)) return;
-      signature = s; dernier = t;
-      dessiner(ciel);
+    /** Couleurs du paysage + soleil/lune ({ versSoleil, soleil, versLune, lune }). */
+    mettreAJour(ciel, astres) {
+      uniforms.uHaut.value.copy(ciel.haut); uniforms.uMilieu.value.copy(ciel.milieu); uniforms.uHorizon.value.copy(ciel.horizon);
+      uniforms.uLoin.value.copy(ciel.loin); uniforms.uMoyen.value.copy(ciel.moyen); uniforms.uPres.value.copy(ciel.pres);
+      uniforms.uBrume.value.copy(ciel.brume); uniforms.uBrumeForce.value = ciel.brumeForce;
+      uniforms.uEtoiles.value = ciel.etoiles; uniforms.uLum.value = ciel.luminosite;
+      if (astres) {
+        vers(astres.versSoleil, uniforms.uSoleilUV.value); uniforms.uSoleil.value.copy(astres.soleil);
+        vers(astres.versLune, uniforms.uLuneUV.value); uniforms.uLune.value.copy(astres.lune);
+      }
     },
+    update(t) { uniforms.uTemps.value = t; },
   };
 }
 
@@ -308,22 +404,29 @@ export function creerEclairage(room, renderer) {
   room.onEnvironment(() => { envBase = room.scene.environmentIntensity; aAppliquer = true; });
 
   const info = { heure: 0, hauteurSoleil: 0, soleilLeve: false };
+  const versSoleil = new THREE.Vector3(), versLune = new THREE.Vector3();
+  const halo = { versSoleil, versLune, soleil: new THREE.Color(), lune: new THREE.Color() };
+  const ledAllumee = room.bandeau.materiau.color.clone(), ledEteinte = new THREE.Color(0.35, 0.33, 0.31);
+  room.enveloppeSoleil.visible = true;   // soleil et lune n'entrent que par la baie
   function appliquer(h) {
     etatA(h);
     const e = hauteurSoleil(h), leve = e > 0;
-    let intensite;
-    if (leve) {      // le soleil entre par la fenêtre (et seulement par elle)
-      directionDepuis(e, orientationSoleil(h), dir);
+    const attenuation = renderer.shadowMap.enabled ? 1 : C.sansOmbres;
+    directionDepuis(Math.max(e, 0.5), orientationSoleil(h), versSoleil).negate();
+    directionDepuis(C.lune.hauteur, C.lune.direction, versLune).negate();
+    const visibiliteLune = 1 - smooth(-8, 0, e);
+    if (leve) {      // le soleil entre par la baie
+      dir.copy(versSoleil).negate();
       L.ciel.color.copy(etat.soleil.couleur);
-      intensite = etat.soleil.intensite * smooth(0, 4, e) * (renderer.shadowMap.enabled ? 1 : C.sansOmbres);
-    } else {         // la lune (comme la version d'origine)
-      directionDepuis(C.lune.hauteur, C.lune.direction, dir);
+      L.ciel.intensity = etat.soleil.intensite * smooth(0, 4, e) * attenuation;
+    } else {         // la lune
+      dir.copy(versLune).negate();
       L.ciel.color.copy(etat.lune.couleur);
-      intensite = etat.lune.intensite * (1 - smooth(-8, 0, e));
+      L.ciel.intensity = etat.lune.intensite * visibiliteLune * attenuation;
     }
-    L.ciel.intensity = intensite;
     L.ciel.position.copy(L.ciel.target.position).addScaledVector(dir, -15);
-    room.enveloppeSoleil.visible = leve;
+    halo.soleil.copy(etat.soleil.couleur).multiplyScalar(smooth(-3, 3, e) * 1.6);
+    halo.lune.setRGB(0.9, 0.94, 1.0).multiplyScalar(visibiliteLune * clamp01(etat.lune.intensite));
 
     L.hemi.color.copy(etat.ambiance.couleurCiel);
     L.hemi.groundColor.copy(etat.ambiance.couleurSol);
@@ -337,15 +440,18 @@ export function creerEclairage(room, renderer) {
     room.ampoule.color.lerpColors(ampouleEteinte, ampouleAllumee, k);
     room.atmosphere.setLevel(k);
 
+    const b = clamp01(etat.bandeau);
+    L.bandeau.intensity = C.bandeauLed * b;
+    room.bandeau.materiau.color.lerpColors(ledEteinte, ledAllumee, Math.sqrt(b));
+
     L.tele.intensity = etat.tele;
     L.led.intensity = etat.retroeclairage;
-    room.vue.mettreAJour(etat.ciel);
+    room.vue.mettreAJour(etat.ciel, halo);
     info.heure = h; info.hauteurSoleil = e; info.soleilLeve = leve;
   }
 
   let cible = heureVoulue(), affichee = cible, ombres = renderer.shadowMap.enabled;
   appliquer(affichee);
-  room.vue.mettreAJour(etat.ciel, true);
 
   // l'heure est relue au début de chaque minute (et au retour sur l'onglet)
   (function planifier() {
@@ -355,7 +461,8 @@ export function creerEclairage(room, renderer) {
 
   return {
     etat, info, config: C,
-    update(dt) {
+    update(dt, t = 0) {
+      room.vue.update(t);
       if (horloge.cycle) cible = heureVoulue();
       const d = (((cible - affichee) % 24) + 36) % 24 - 12;   // écart le plus court, en heures
       if (Math.abs(d) > 1e-6) {
