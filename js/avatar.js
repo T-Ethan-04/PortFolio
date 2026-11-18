@@ -58,12 +58,12 @@ export const POSE = {
   manette: {
     avant: 0.36,           // distance de la manette devant les hanches
     hauteur: 0.20,         // hauteur de la manette au-dessus des hanches
-    ecartMains: 0.075,     // demi-écart entre les poignets
+    ecartMains: 0.09,      // demi-écart entre les poignets
     inclinaison: 20,       // manette inclinée vers le visage
   },
   coudes:    { ecart: 0.45, arriere: 0.35 }, // coudes vers l'extérieur / vers l'arrière
   avantBras: { torsion: 0 },                 // rotation des avant-bras sur eux-mêmes
-  mains:     { flexion: -5, versInterieur: 18, torsion: 30 }, // poignets
+  mains:     { flexion: -5, versInterieur: 6, torsion: 30 },  // poignets
   doigts:    { flexion: [35, 50, 30], pouce: [5, 15, 10] },   // flexion par phalange
 
   // Animation procédurale (0 = désactivé, 1 = normal)
@@ -141,11 +141,17 @@ for (const [S, s] of [['Left', 'l'], ['Right', 'r']]) {
     [k + 'Foot']: [k + 'foot', 'foot' + s],
     [k + 'Toe']: [k + 'toebase', k + 'toes', k + 'toe', 'ball' + s],
   });
+  // squelette « Biped » de 3ds Max (Bip01 L Thigh, Bip01 L Calf…), nettoyé en « lthigh », « lcalf »…
+  const biped = { Shoulder: 'clavicle', Arm: 'upperarm', ForeArm: 'forearm', Hand: 'hand', UpLeg: 'thigh', Leg: 'calf', Foot: 'foot', Toe: 'toe0' };
+  for (const [cle, nom] of Object.entries(biped)) BONE_ALIASES[k + cle].push(s + nom);
   const seg = ['', 'proximal', 'intermediate', 'distal'];
-  for (const f of ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']) {
+  ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky'].forEach((f, fi) => {
     const fl = f.toLowerCase();
-    for (let i = 1; i <= 3; i++) BONE_ALIASES[k + f + i] = [k + 'hand' + fl + i, k + fl + i, fl + '0' + i + s, k + fl + seg[i]];
-  }
+    for (let i = 1; i <= 3; i++) {
+      BONE_ALIASES[k + f + i] = [k + 'hand' + fl + i, k + fl + i, fl + '0' + i + s, k + fl + seg[i],
+        s + 'finger' + fi + (i > 1 ? String(i - 1) : '')];   // Biped : Finger0 / Finger01 / Finger02 = pouce…
+    }
+  });
 }
 const cleanName = n => n.toLowerCase().replace(/^.*[:|]/, '').replace(/^mixamorig\d*/, '').replace(/^(armature|rig|def|bip0?1)[_\s.-]+/, '').replace(/[^a-z0-9]/g, '');
 
