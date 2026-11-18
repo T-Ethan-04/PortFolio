@@ -32,6 +32,7 @@ const ROOM_POS = new THREE.Vector3(1.25, 1.85, 4.55);   // vue de dos (prototype
 const ROOM_TGT = new THREE.Vector3(0.0, 1.12, -2.6);
 const ROOM_POS_PORTRAIT = new THREE.Vector3(0.45, 1.95, 4.75);   // écran vertical (téléphone)
 const roomPos = () => (innerWidth / innerHeight < 0.8 ? ROOM_POS_PORTRAIT : ROOM_POS).clone();
+const CAMERA_Y_MAX = 2.7;   // la caméra reste sous le plafond (3 m) : pas de vue « par-dessus » le salon
 const INTRO = { pause: 0.9, duree: 3.2 };               // secondes
 const QUALITE = {
   haute:   { pixelRatio: 1.75, ombres: true,  tailleOmbres: 2048, ao: true,  bloom: true,  msaa: 4, cinema: true,  atmosphere: true },
@@ -430,7 +431,11 @@ async function main() {
         look.x += (look.tx - look.x) * kl; look.y += (look.ty - look.y) * kl;
         controls.target.set(ROOM_TGT.x + look.x * 0.5, ROOM_TGT.y - look.y * 0.22, ROOM_TGT.z);
       }
+      // vue plongeante limitée selon le recul, pour que la caméra ne passe jamais au-dessus du plafond
+      const recul = camera.position.distanceTo(controls.target);
+      controls.minPolarAngle = Math.max(1.2, Math.acos(Math.min(1, (CAMERA_Y_MAX - controls.target.y) / recul)));
       controls.update();
+      if (camera.position.y > CAMERA_Y_MAX) { camera.position.y = CAMERA_Y_MAX; camera.lookAt(controls.target); }
     }
     const onTV = mode === 'tv' || (mode === 'flying' && tween && tween.t1.z < -3);
     cinema.tick(dt, camera.aspect, onTV);
