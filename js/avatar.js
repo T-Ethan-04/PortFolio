@@ -21,6 +21,9 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { creerManette, sdfManette, CONTACTS, MANETTE_FICHIER } from './manette.js';
+import { FORME } from './manette_forme.js';
+export { MANETTE_FICHIER };
 
 export const AVATAR_FICHIERS = ['assets/avatar.glb', 'assets/mannequin.glb'];
 
@@ -70,6 +73,22 @@ export const POSE = {
     index: [45, 55, 40],   // index posé sur la gâchette
     pouce: [10, 20, 15],   // flexion du pouce, dont le bout vient se poser sur le joystick
   },
+  // Prise de la nouvelle manette (manette.js) : la paume se pose sur la poignée, les doigts se referment au contact
+  prise2: {
+    long: 1.489,           // position de la paume le long de la poignée (0 = racine, 1 = coude, 2 = bout)
+    rayonPoignee: 0.0215,  // rayon de la poignée (m)
+    epaisseurPaume: 0.004, // distance entre la peau de la paume et l'os de la main
+    dehorsBas: -0.079,     // la paume vient un peu par-dessous (négatif = par-dessus)
+    D: [-0.395, -0.307, 1], // direction poignet → jointures (repère manette, x côté gauche) — réglée par optimisation
+    N: [-1, 0.439, -0.375], // direction vers laquelle regarde la paume
+    etapes: 4,             // (réglage) 1 paume, 2 doigts, 3 index, 4 pouce
+    recul: 0.562,          // poignet en retrait de la paume (fraction de la longueur de la paume)
+    serrage: 0.65,         // doigts resserrés les uns contre les autres (0 = écartés comme au repos)
+    dosMain: 0.010,        // poignet décalé côté dos de la main
+    rayonDoigt: [0.0085, 0.0080, 0.0070],  // majeur, annulaire, auriculaire (index ≈ majeur)
+    rayonPouce: 0.0095,
+    flexionMax: [85, 105, 75],             // flexion maximale de chaque phalange (degrés)
+  },
   coudes:    { ecart: 0.45, arriere: 0.35 }, // coudes vers l'extérieur / vers l'arrière
   avantBras: { torsion: 0 },                 // rotation des avant-bras sur eux-mêmes
 
@@ -116,9 +135,9 @@ export async function loadAvatarGLTF(loader, onProgress, urls = AVATAR_FICHIERS)
 }
 
 /** Crée l'avatar articulé (ou l'avatar de secours) à partir du GLB chargé. */
-export function createAvatar(loaded, scene, M, room) {
+export function createAvatar(loaded, scene, M, room, coqueManette = null) {
   if (loaded) {
-    const av = new RiggedAvatar(loaded.gltf, scene, M, room, loaded.url);
+    const av = new RiggedAvatar(loaded.gltf, scene, M, room, loaded.url, coqueManette);
     if (av.ok) return av;
     console.warn('[avatar] Squelette non reconnu dans', loaded.url, '→ avatar de secours.');
   }
@@ -254,11 +273,164 @@ export function buildController(M) {
 }
 
 // ---------------------------------------------------------------------
+//  Rendu réaliste de la peau, des yeux et des tissus
+// ---------------------------------------------------------------------
+export const RENDU_PEAU = {
+  diffusion: [0.50, 0.24, 0.16],  // lumière qui « traverse » la peau près de l'ombre (rouge > vert > bleu)
+  pores: 0.000016,                // relief des pores (m)
+  duvet: 0.22,                    // reflet velouté sur les bords (duvet, tissus)
+  brillance: 0.10,                // film légèrement gras du visage
+  saturation: 0.9,                // peau un peu moins orangée
+  subdivision: true,              // silhouettes arrondies (doigts, mâchoire, oreilles)
+};
+
+export const RENDU_YEUX = {
+  rayon: 0.0122,            // rayon de la cornée (m)
+  ouverture: 0.72,          // demi-angle de la calotte (radians)
+  avance: 0.0006,           // cornée un peu en avant du globe
+  paupiereHaut: 34,         // descente de la paupière supérieure au clignement (degrés autour de l'œil)
+  paupiereBas: -9,          // remontée de la paupière inférieure
+  dureeClignement: 0.17,    // secondes
+  intervalle: [2.2, 6.0],   // secondes entre deux clignements
+  saccade: [4, 2.2],        // amplitude des petits mouvements du regard (degrés : horizontal, vertical)
+};
+
+const GLSL_PEAU = /* glsl */`
+  varying float vPeau;
+  varying vec3 vObj;
+  float h31p(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+  float bruitP(vec3 x) {
+    vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(mix(h31p(i), h31p(i + vec3(1,0,0)), f.x), mix(h31p(i + vec3(0,1,0)), h31p(i + vec3(1,1,0)), f.x), f.y),
+               mix(mix(h31p(i + vec3(0,0,1)), h31p(i + vec3(1,0,1)), f.x), mix(h31p(i + vec3(0,1,1)), h31p(i + vec3(1,1,1)), f.x), f.y), f.z);
+  }
+  vec3 reliefPeau(float h, vec3 n, float faceDir) {
+    vec3 sx = dFdx(-vViewPosition), sy = dFdy(-vViewPosition);
+    vec3 r1 = cross(sy, n), r2 = cross(n, sx);
+    float det = dot(sx, r1) * faceDir;
+    vec3 g = sign(det) * (dFdx(h) * r1 + dFdy(h) * r2);
+    return normalize(abs(det) * n - g);
+  }
+`;
+
+/**
+ * Améliore les matériaux de l'avatar : diffusion de la lumière sous la peau (ombres douces et chaudes),
+ * pores, léger film brillant, duvet ; tissus veloutés. La peau est repérée par sommet :
+ * tête entière + mains (poids des os de la main et des doigts).
+ */
+/**
+ * Subdivision « Phong » : chaque triangle devient quatre, les nouveaux sommets suivent la courbure
+ * donnée par les normales. Les silhouettes (doigts, mâchoire, oreilles) s'arrondissent sans changer
+ * le visage. Les poids d'os sont mélangés pour que la peau plie toujours correctement.
+ */
+function subdiviser(g, alpha = 0.75) {
+  const P = g.attributes.position, N = g.attributes.normal, UV = g.attributes.uv, SI = g.attributes.skinIndex, SW = g.attributes.skinWeight;
+  if (!P || !N || !g.index) return g;
+  const idx = g.index.array;
+  // lecture composante par composante : fonctionne aussi pour les attributs entrelacés (fichiers optimisés)
+  const lire = (att, k) => { const a = new Array(att.count * k); for (let i = 0; i < att.count; i++) for (let c = 0; c < k; c++) a[i * k + c] = att.getComponent(i, c); return a; };
+  const pos = lire(P, 3), nor = lire(N, 3), uv = UV ? lire(UV, 2) : null;
+  const si = SI ? lire(SI, 4) : null, sw = SW ? lire(SW, 4) : null;
+  const milieux = new Map();
+  const p = new THREE.Vector3(), q = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3(), na = new THREE.Vector3(), nb = new THREE.Vector3();
+  const milieu = (i, j) => {
+    const cle = i < j ? i * 1e7 + j : j * 1e7 + i;
+    if (milieux.has(cle)) return milieux.get(cle);
+    a.fromArray(pos, 3 * i); b.fromArray(pos, 3 * j); na.fromArray(nor, 3 * i); nb.fromArray(nor, 3 * j);
+    q.copy(a).add(b).multiplyScalar(0.5);
+    const pa = q.clone().addScaledVector(na, -q.clone().sub(a).dot(na));
+    const pb = q.clone().addScaledVector(nb, -q.clone().sub(b).dot(nb));
+    p.copy(pa).add(pb).multiplyScalar(0.5).multiplyScalar(alpha).addScaledVector(q, 1 - alpha);
+    const k = pos.length / 3;
+    pos.push(p.x, p.y, p.z);
+    const nn = na.clone().add(nb).normalize(); nor.push(nn.x, nn.y, nn.z);
+    if (uv) uv.push((uv[2 * i] + uv[2 * j]) / 2, (uv[2 * i + 1] + uv[2 * j + 1]) / 2);
+    if (si) {
+      const w = new Map();
+      for (const v of [i, j]) for (let c = 0; c < 4; c++) { const os = si[4 * v + c], wt = sw[4 * v + c] * 0.5; if (wt > 0) w.set(os, (w.get(os) || 0) + wt); }
+      const tri = [...w.entries()].sort((x, y) => y[1] - x[1]).slice(0, 4), tot = tri.reduce((s, e) => s + e[1], 0) || 1;
+      for (let c = 0; c < 4; c++) { si.push(tri[c] ? tri[c][0] : 0); sw.push(tri[c] ? tri[c][1] / tot : 0); }
+    }
+    milieux.set(cle, k);
+    return k;
+  };
+  const out = [];
+  for (let t = 0; t < idx.length; t += 3) {
+    const A = idx[t], Bv = idx[t + 1], C = idx[t + 2];
+    const ab = milieu(A, Bv), bc = milieu(Bv, C), ca = milieu(C, A);
+    out.push(A, ab, ca, ab, Bv, bc, ca, bc, C, ab, bc, ca);
+  }
+  const r = new THREE.BufferGeometry();
+  r.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  r.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  if (uv) r.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  if (si) { r.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(si, 4)); r.setAttribute('skinWeight', new THREE.Float32BufferAttribute(sw, 4)); }
+  r.setIndex(pos.length / 3 > 65535 ? new THREE.Uint32BufferAttribute(out, 1) : new THREE.Uint16BufferAttribute(out, 1));
+  r.groups = g.groups; r.boundingSphere = g.boundingSphere; r.boundingBox = g.boundingBox;
+  return r;
+}
+
+function ameliorerRendu(model) {
+  const R = RENDU_PEAU;
+  model.traverse(o => {
+    if (!o.isMesh || !o.geometry) return;
+    const ancien = o.material;
+    if (!ancien || !ancien.isMeshStandardMaterial || ancien.alphaTest > 0 || ancien.transparent) return;   // cheveux : inchangés
+    if (RENDU_PEAU.subdivision) { const vieille = o.geometry; o.geometry = subdiviser(vieille); vieille.dispose(); }
+    const nom = (ancien.name || '').toLowerCase();
+    const tete = nom.includes('head');
+    // --- masque de peau par sommet ---
+    const g = o.geometry, n = g.attributes.position.count, peau = new Float32Array(n);
+    if (tete) peau.fill(1);
+    else if (o.isSkinnedMesh && g.attributes.skinIndex) {
+      const os = o.skeleton.bones.map(b => /hand|finger/i.test(b.name));
+      const si = g.attributes.skinIndex, sw = g.attributes.skinWeight;
+      for (let i = 0; i < n; i++) {
+        let w = 0;
+        for (let k = 0; k < 4; k++) if (os[si.getComponent(i, k)]) w += sw.getComponent(i, k);
+        peau[i] = THREE.MathUtils.smoothstep(w, 0.35, 0.9);
+      }
+    }
+    g.setAttribute('peau', new THREE.BufferAttribute(peau, 1));
+    // --- matériau physique (duvet, film gras) ---
+    const m = new THREE.MeshPhysicalMaterial();
+    THREE.MeshStandardMaterial.prototype.copy.call(m, ancien);
+    m.sheen = R.duvet; m.sheenRoughness = 0.65; m.sheenColor = new THREE.Color(tete ? '#ffcbb2' : '#d9d4cf');
+    if (tete) { m.clearcoat = R.brillance; m.clearcoatRoughness = 0.38; }
+    m.onBeforeCompile = sh => {
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute float peau;\nvarying float vPeau;\nvarying vec3 vObj;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPeau = peau; vObj = position;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\n' + GLSL_PEAU)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          { float l = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+            diffuseColor.rgb = mix(diffuseColor.rgb, mix(vec3(l), diffuseColor.rgb, ${R.saturation.toFixed(3)}), vPeau); }`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+          { float hp = (bruitP(vObj * 2600.0) - 0.5) + 0.5 * (bruitP(vObj * 5200.0 + 7.0) - 0.5);
+            float ht = (bruitP(vObj * 1400.0 + 3.0) - 0.5);
+            normal = reliefPeau(${R.pores.toExponential(3)} * (vPeau * hp + (1.0 - vPeau) * 0.6 * ht), normal, faceDirection); }`)
+        .replace('#include <lights_physical_pars_fragment>', THREE.ShaderChunk.lights_physical_pars_fragment.replace(
+          'reflectedLight.directDiffuse += irradiance * BRDF_Lambert( material.diffuseColor );', `{
+          float ndlS = dot( geometryNormal, directLight.direction );
+          vec3 wS = vec3(${R.diffusion.map(v => v.toFixed(3)).join(',')}) * vPeau;
+          vec3 dS = clamp( ( vec3( ndlS ) + wS ) / ( 1.0 + wS ), 0.0, 1.0 );
+          reflectedLight.directDiffuse += dS * directLight.color * BRDF_Lambert( material.diffuseColor );
+        }`));
+    };
+    m.customProgramCacheKey = () => 'peau-avatar';
+    o.material = m;
+    ancien.dispose();
+  });
+}
+
+// ---------------------------------------------------------------------
 //  Avatar GLB articulé
 // ---------------------------------------------------------------------
 export class RiggedAvatar {
-  constructor(gltf, scene, M, room, url = '') {
+  constructor(gltf, scene, M, room, url = '', coqueManette = null) {
     this.isFallback = false;
+    this.nouvelleManette = !!coqueManette;
     this.isMannequin = /mannequin/i.test(url);
     this.model = gltf.scene;
     this.root = new THREE.Group(); this.root.name = 'avatar';
@@ -269,6 +441,7 @@ export class RiggedAvatar {
     if (!this.ok) { scene.remove(this.root); console.warn('[avatar] Os trouvés :', Object.keys(B)); return; }
 
     this.bones = []; this.model.traverse(o => { if (o.isBone) this.bones.push(o); });
+    if (!this.isMannequin) ameliorerRendu(this.model);
     this.materials = [];
     this.model.traverse(o => {
       if (!o.isMesh) return;
@@ -286,8 +459,9 @@ export class RiggedAvatar {
     this.applyPose();
     this.base = this.bones.map(b => b.quaternion.clone());
 
-    this.controller = buildController(M);
+    this.controller = coqueManette ? creerManette(coqueManette) : buildController(M);
     scene.add(this.controller);
+    if (!this.isMannequin) this.preparerYeux(scene);
 
     // animations éventuelles du fichier
     this.clips = gltf.animations || [];
@@ -414,6 +588,7 @@ export class RiggedAvatar {
 
     // --- la manette, puis les mains qui la saisissent ---
     const M = this.repereManette(hips);
+    if (this.nouvelleManette) { this.prendreManette(M); this.manetteRel = this.repereMains().invert().multiply(M); return; }
     const X = new THREE.Vector3(), Y = new THREE.Vector3(), Z = new THREE.Vector3();
     M.extractBasis(X, Y, Z);
     const point = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(M);
@@ -460,6 +635,212 @@ export class RiggedAvatar {
     }
     // la manette suit ensuite les mains (sursauts, respiration)
     this.manetteRel = this.repereMains().invert().multiply(M);
+  }
+
+  /**
+   * Prise réaliste de la nouvelle manette : la paume épouse la poignée, chaque doigt se referme
+   * jusqu'à toucher la coque (sans la traverser), l'index se pose sur la gâchette et le pouce
+   * sur le joystick (cinématique inverse), d'après la forme exacte de la manette (manette_forme.js).
+   */
+  prendreManette(M) {
+    const B = this.B, P = POSE.prise2;
+    const Minv = M.clone().invert(), X = new THREE.Vector3(), Y = new THREE.Vector3(), Z = new THREE.Vector3();
+    M.extractBasis(X, Y, Z);
+    const monde = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(M);
+    const dirMonde = v => v.clone().transformDirection(M);
+    const _l = new THREE.Vector3();
+    const distance = v => { _l.copy(v).applyMatrix4(Minv); return sdfManette(_l.x, _l.y, _l.z); };
+    const bout = b => (b.children[0] && b.children[0].isBone ? wp(b.children[0]) : wp(b).add(wp(b).sub(wp(b.parent)).multiplyScalar(0.75)));
+
+    for (const [side, s] of [['left', 1], ['right', -1]]) {
+      const S = k => B[side + k];
+      // --- 1. la paume contre l'extérieur de la poignée ---
+      const G = FORME.poignee;
+      const racine = new THREE.Vector3(s * G.racine[0], G.racine[1], G.racine[2]);
+      const coude = new THREE.Vector3(s * G.coude[0], G.coude[1], G.coude[2]);
+      const extremite = new THREE.Vector3(s * G.bout[0], G.bout[1], G.bout[2]);
+      const [a0, a1, t] = P.long <= 1 ? [racine, coude, P.long] : [coude, extremite, P.long - 1];
+      const axe = a1.clone().sub(a0).normalize();                              // vers le joueur et vers le bas
+      const centre = a0.clone().lerp(a1, t);
+      const dehors = new THREE.Vector3(s, -P.dehorsBas, 0).projectOnPlane(axe).normalize();
+      const paumeL = centre.clone().addScaledVector(dehors, P.rayonPoignee + P.epaisseurPaume);
+      const Dl = new THREE.Vector3(s * P.D[0], P.D[1], P.D[2]).normalize();                 // poignet → jointures
+      const Nl = new THREE.Vector3(s * P.N[0], P.N[1], P.N[2]).projectOnPlane(Dl).normalize(); // la paume regarde la poignée
+      const D = dirMonde(Dl), N = dirMonde(Nl), paume = paumeL.applyMatrix4(M);
+      const poignet = paume.clone().addScaledVector(D, -P.recul * this.paume[side]).addScaledVector(N, -P.dosMain);
+      const elbowPole = this.U.clone().negate().addScaledVector(this.L, s * POSE.coudes.ecart).addScaledVector(this.F, -POSE.coudes.arriere);
+      solveTwoBone(S('Arm'), S('ForeArm'), S('Hand'), poignet, elbowPole);
+      const hand = S('Hand'), mid = S('Middle1') || S('Index1');
+      if (mid) {
+        aim(hand, mid, D);
+        const axeMain = wp(mid).sub(wp(hand)).normalize();
+        const actuelle = this.palmWorld(side).projectOnPlane(axeMain).normalize();
+        const voulue = N.clone().projectOnPlane(axeMain).normalize();
+        rotateAxis(hand, axeMain, Math.atan2(actuelle.clone().cross(voulue).dot(axeMain), actuelle.dot(voulue)));
+      }
+
+      // doigts resserrés : on réduit l'écart de chaque doigt par rapport au majeur, dans le plan de la paume
+      if (S('Middle1') && S('Middle2')) {
+        const n = this.palmWorld(side), ref = wp(S('Middle2')).sub(wp(S('Middle1'))).projectOnPlane(n).normalize();
+        for (const f of ['Index', 'Ring', 'Pinky']) {
+          const b1 = S(f + '1'), b2 = S(f + '2');
+          if (!b1 || !b2) continue;
+          const v = wp(b2).sub(wp(b1)).projectOnPlane(n).normalize();
+          const ang = Math.atan2(v.clone().cross(ref).dot(n), v.dot(ref));
+          rotateAxis(b1, n, ang * P.serrage);
+        }
+      }
+      if (P.etapes < 2) continue;
+      // --- 2. majeur, annulaire, auriculaire : refermés phalange par phalange jusqu'au contact ---
+      for (const [f, r] of [['Middle', P.rayonDoigt[0]], ['Ring', P.rayonDoigt[1]], ['Pinky', P.rayonDoigt[2]]]) {
+        const os = [S(f + '1'), S(f + '2'), S(f + '3')];
+        if (os.some(o => !o)) continue;
+        this.refermer(os, side, distance, r, P.flexionMax, bout);
+      }
+
+      if (P.etapes < 3) continue;
+      // --- 3. index sur la gâchette ---
+      const ix = [S('Index1'), S('Index2'), S('Index3')];
+      if (ix.every(Boolean)) {
+        const cible = monde(...CONTACTS.gachette(s)).addScaledVector(Z, P.rayonDoigt[0] * 0.9);
+        this.ik(ix, () => bout(ix[2]), cible, [null, b => this.curlAxis(b, b.children[0] || b, side), b => this.curlAxis(b, b.children[0] || b, side)], [40, 100, 80]);
+        this.degager(ix, side, distance, P.rayonDoigt[0] * 0.85, bout);
+      }
+
+      if (P.etapes < 4) continue;
+      // --- 4. pouce sur le joystick ---
+      const px = [S('Thumb1'), S('Thumb2'), S('Thumb3')];
+      if (px.every(Boolean)) {
+        const cible = monde(...CONTACTS.stick(s)).addScaledVector(Y, P.rayonPouce);
+        const plie = b => { const d = (b.children[0] && b.children[0].isBone ? wp(b.children[0]) : bout(b)).sub(wp(b)).normalize(); return d.cross(Y.clone().negate()).normalize(); };
+        this.ik(px, () => bout(px[2]), cible, [null, plie, plie], [55, 60, 70]);
+      }
+    }
+  }
+
+  /**
+   * Referme un doigt comme une vraie main : les trois articulations plient ensemble ; dès qu'une
+   * phalange touche la manette, elle et les articulations avant elle s'arrêtent, les suivantes continuent.
+   * Une phalange déjà enfoncée au départ ne compte comme contact que si elle s'enfonce davantage.
+   */
+  refermer(os, side, distance, r, maxi, bout) {
+    const fin = i => (i < 2 ? wp(os[i + 1]) : bout(os[2]));
+    const echantillons = i => { const a = wp(os[i]), b = fin(i); return [0.3, 0.6, 0.9, 1].map(t => a.clone().lerp(b, t)); };
+    const ref = [0, 1, 2].map(i => echantillons(i).map(p => Math.min(distance(p), r)));
+    const contact = i => echantillons(i).some((p, k) => distance(p) < ref[i][k] - 1e-4);
+    const axeDe = j => this.curlAxis(os[j], j < 2 ? os[j + 1] : (os[2].children[0] || os[2]), side);
+    const ratio = [1, 1.25, 0.85], total = [0, 0, 0], libre = [true, true, true];
+    const pas = 1.5 * DEG;
+    for (let it = 0; it < 120 && libre.some(Boolean); it++) {
+      for (let j = 0; j < 3; j++) {
+        if (!libre[j]) continue;
+        const a = pas * ratio[j];
+        if (total[j] + a > maxi[j] * DEG) { libre[j] = false; continue; }
+        rotateAxis(os[j], axeDe(j), a); total[j] += a;
+      }
+      for (let i = 0; i < 3; i++) {
+        if (contact(i)) {
+          for (let j = 0; j <= i; j++) if (libre[j]) { rotateAxis(os[j], axeDe(j), -pas * ratio[j] * 0.5); libre[j] = false; }
+        }
+      }
+    }
+  }
+
+  /** Écarte un doigt de la coque s'il la traverse (après la cinématique inverse). */
+  degager(os, side, distance, r, bout) {
+    for (let it = 0; it < 12; it++) {
+      let pire = 0;
+      for (let i = 0; i < 3; i++) {
+        const a = wp(os[i]), b = i < 2 ? wp(os[i + 1]) : bout(os[2]);
+        for (const t of [0.5, 1]) pire = Math.max(pire, r - distance(a.clone().lerp(b, t)));
+      }
+      if (pire <= 0) return;
+      const axe = this.curlAxis(os[1], os[2], side);
+      rotateAxis(os[1], axe, -2 * DEG);
+    }
+  }
+
+  /** Cinématique inverse par descente cyclique (CCD) ; axes[i] = null → rotation libre. limites en degrés. */
+  ik(os, bout, cible, axes, limites, iterations = 14) {
+    const cumul = os.map(() => 0);
+    for (let it = 0; it < iterations; it++) {
+      for (let j = os.length - 1; j >= 0; j--) {
+        const J = wp(os[j]), v1 = bout().sub(J), v2 = cible.clone().sub(J);
+        if (v1.lengthSq() < 1e-10 || v2.lengthSq() < 1e-10) continue;
+        if (axes[j]) {
+          const axe = axes[j](os[j]);
+          const a = v1.projectOnPlane(axe).normalize(), b = v2.projectOnPlane(axe).normalize();
+          let ang = Math.atan2(a.clone().cross(b).dot(axe), a.dot(b));
+          const lim = limites[j] * DEG;
+          ang = THREE.MathUtils.clamp(cumul[j] + ang, -lim * 0.25, lim) - cumul[j];
+          cumul[j] += ang; rotateAxis(os[j], axe, ang);
+        } else {
+          const q = new THREE.Quaternion().setFromUnitVectors(v1.normalize(), v2.normalize());
+          const ang = 2 * Math.acos(THREE.MathUtils.clamp(q.w, -1, 1));
+          const reste = limites[j] * DEG - cumul[j];
+          if (reste <= 0) continue;
+          if (ang > reste) q.slerp(new THREE.Quaternion(), 1 - reste / ang);
+          cumul[j] += Math.min(ang, reste); rotateWorld(os[j], q);
+        }
+      }
+      if (bout().distanceTo(cible) < 4e-4) break;
+    }
+  }
+
+  /** Yeux vivants : cornée brillante (reflets), clignements et petits mouvements du regard. */
+  preparerYeux(scene) {
+    const trouve = re => this.bones.find(b => re.test(cleanName(b.name)));
+    const mat = new THREE.MeshPhysicalMaterial({ color: '#000000', roughness: 0.035, metalness: 0, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, envMapIntensity: 1.4 });
+    this.materials.push(mat);
+    this.yeux = [];
+    for (const c of ['l', 'r']) {
+      const oeil = trouve(new RegExp('^' + c + 'eye$'));
+      if (!oeil) continue;
+      const haut = trouve(new RegExp('^' + c + 'eyeblinktop$')), bas = trouve(new RegExp('^' + c + 'eyeblinkbottom$'));
+      const tete = oeil.parent, qTete = tete.getWorldQuaternion(new THREE.Quaternion()).invert();
+      const lat = this.L.clone().applyQuaternion(qTete).normalize();        // axe gauche-droite, repère de la tête
+      const centre = oeil.position.clone();
+      const paupieres = [haut, bas].map(b => (b && b.parent === tete ? { b, p0: b.position.clone(), q0: b.quaternion.clone() } : null));
+      // cornée : calotte de sphère devant l'œil, orientée vers l'avant de l'œil (entre les deux paupières)
+      const avant = haut && bas ? wp(haut).add(wp(bas)).multiplyScalar(0.5).sub(wp(oeil)).normalize() : this.F.clone();
+      const cornee = new THREE.Mesh(new THREE.SphereGeometry(RENDU_YEUX.rayon, 32, 12, 0, Math.PI * 2, 0, RENDU_YEUX.ouverture), mat);
+      cornee.position.copy(wp(oeil)); cornee.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), avant);
+      cornee.position.addScaledVector(avant, RENDU_YEUX.avance);
+      cornee.renderOrder = 2; cornee.castShadow = false;
+      scene.add(cornee); oeil.attach(cornee);
+      this.yeux.push({ oeil, tete, lat, centre, haut: paupieres[0], bas: paupieres[1], cornee });
+    }
+    this.clign = { prochain: 1.5 + Math.random() * 3, t0: -1 };
+    this.regard = { yaw: 0, pitch: 0, cy: 0, cp: 0, prochain: 0.8 };
+  }
+
+  /** Clignements (fermeture rapide, ouverture plus lente) et saccades du regard. */
+  animerYeux(t, dt) {
+    if (!this.yeux || !this.yeux.length) return;
+    const C = this.clign, Y = RENDU_YEUX;
+    if (C.t0 < 0 && t > C.prochain) C.t0 = t;
+    let k = 0;
+    if (C.t0 >= 0) {
+      const u = (t - C.t0) / Y.dureeClignement;
+      if (u >= 1) { C.t0 = -1; C.prochain = t + (Math.random() < 0.15 ? 0.22 : Y.intervalle[0] + Math.random() * (Y.intervalle[1] - Y.intervalle[0])); }
+      else { k = u < 0.35 ? u / 0.35 : 1 - (u - 0.35) / 0.65; k = k * k * (3 - 2 * k); }
+    }
+    const R = this.regard;
+    if (t > R.prochain) { R.cy = (Math.random() - 0.5) * Y.saccade[0] * 2 * DEG; R.cp = (Math.random() - 0.5) * Y.saccade[1] * 2 * DEG; R.prochain = t + 0.35 + Math.random() * 2.4; }
+    const a = 1 - Math.exp(-Math.min(dt, 0.1) * 30);
+    R.yaw += (R.cy - R.yaw) * a; R.pitch += (R.cp - R.pitch) * a;
+    const q = new THREE.Quaternion();
+    for (const E of this.yeux) {
+      for (const [P, ang] of [[E.haut, Y.paupiereHaut], [E.bas, Y.paupiereBas]]) {
+        if (!P) continue;
+        q.setFromAxisAngle(E.lat, ang * DEG * k);
+        P.b.position.copy(P.p0).sub(E.centre).applyQuaternion(q).add(E.centre);
+        P.b.quaternion.copy(q).multiply(P.q0);
+      }
+      rotateAxis(E.oeil, this.U, R.yaw);
+      rotateAxis(E.oeil, this.L, R.pitch + k * 0.06);
+    }
   }
 
   /** Repère voulu pour la manette (d'après POSE.manette) : x = gauche du joueur, y = haut, z = vers la télé. */
@@ -525,6 +906,7 @@ export class RiggedAvatar {
     const pitch = Math.sin(t * 0.47) * 0.02 * A.tete - e * 0.04;
     rotateAxis(B.head, U, yaw);
     rotateAxis(B.head, L, pitch);
+    this.animerYeux(t, dt);
 
     // avant-bras : la manette se soulève ou tourne pendant un sursaut
     if (e) {
@@ -533,6 +915,8 @@ export class RiggedAvatar {
       rotateAxis(B.rightForeArm, L, -e * (0.16 * up - (j.type === 'virage' ? 0.14 * j.dir : 0)));
     }
 
+    // nouvelle manette : les pouces poussent vraiment les joysticks, les index pressent les gâchettes
+    if (this.nouvelleManette) { this.jouer(t, e); return; }
     // pouces sur les joysticks + index sur les gâchettes
     const act = (0.55 + 0.45 * Math.sin(t * 0.7)) * A.pouces * (1 + e);
     for (const [side, ph] of [['left', 0], ['right', 2.1]]) {
@@ -545,6 +929,40 @@ export class RiggedAvatar {
       if (i1 && i2) rotateAxis(i1, this.curlAxis(i1, i2, side), Math.max(0, Math.sin(t * 2.3 + ph * 3)) * 0.25 * act);
     }
     this.updateController();
+  }
+
+  /**
+   * Gestes de jeu : chaque joystick suit une trajectoire douce (le gauche pour se déplacer, le droit pour la caméra),
+   * le pouce le suit par cinématique inverse ; les gâchettes sont pressées par moments et l'index suit.
+   */
+  jouer(t, e) {
+    const B = this.B, A = POSE.animation, man = this.controller, et = man.userData.etat;
+    this.updateController();
+    man.updateMatrixWorld(true);
+    const Mw = man.matrixWorld, Y = new THREE.Vector3().setFromMatrixColumn(Mw, 1).normalize(), Z = new THREE.Vector3().setFromMatrixColumn(Mw, 2).normalize();
+    const n = (f, ph) => Math.sin(t * f + ph) * 0.6 + Math.sin(t * f * 2.31 + ph * 1.7) * 0.4;
+    const act = A.pouces * (0.6 + 0.4 * Math.sin(t * 0.37)) * (1 + 0.6 * e);
+    et.stickG = [n(1.3, 0) * 0.55 * act, (0.35 + n(0.9, 2) * 0.5) * act];        // gauche : avance surtout vers l'avant
+    et.stickD = [n(2.1, 4) * 0.6 * act, n(1.7, 1) * 0.3 * act];                   // droit : regarde à gauche / à droite
+    const presse = x => THREE.MathUtils.smoothstep(x, 0.55, 0.9);
+    et.gachetteG = presse(Math.sin(t * 0.83 + 1.2) * 0.5 + 0.5) * 0.7 * act;
+    et.gachetteD = Math.max(presse(Math.sin(t * 1.17) * 0.5 + 0.5), e) * act;
+    man.animer();
+    const P = POSE.prise2, bout = b => wp(b).add(wp(b).sub(wp(b.parent)).multiplyScalar(0.75));
+    for (const [side, s] of [['left', 1], ['right', -1]]) {
+      const S = k => B[side + k];
+      const px = [S('Thumb1'), S('Thumb2'), S('Thumb3')], ix = [S('Index1'), S('Index2'), S('Index3')];
+      if (px.every(Boolean)) {
+        const [ax, az] = s > 0 ? et.stickG : et.stickD;
+        const cible = man.sommetStick(s, ax, az).applyMatrix4(Mw).addScaledVector(Y, P.rayonPouce);
+        const plie = b => { const d = (b.children[0] && b.children[0].isBone ? wp(b.children[0]) : bout(b)).sub(wp(b)).normalize(); return d.cross(Y.clone().negate()).normalize(); };
+        this.ik(px, () => bout(px[2]), cible, [null, plie, plie], [12, 25, 25], 4);
+      }
+      if (ix.every(Boolean)) {
+        const cible = man.appuiGachette(s, s > 0 ? et.gachetteG : et.gachetteD).applyMatrix4(Mw).addScaledVector(Z, P.rayonDoigt[0] * 0.9);
+        this.ik(ix, () => bout(ix[2]), cible, [null, b => this.curlAxis(b, b.children[0] || b, side), b => this.curlAxis(b, b.children[0] || b, side)], [8, 30, 30], 4);
+      }
+    }
   }
 
   /** Change l'éclairage d'ambiance appliqué aux matériaux de l'avatar. */

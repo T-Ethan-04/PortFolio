@@ -19,7 +19,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { loadContent } from './content.js';
 import { buildRoom, loadOptionalAssets, LAYOUT } from './scene.js';
-import { createGLTFLoader, loadAvatarGLTF, createAvatar } from './avatar.js';
+import { createGLTFLoader, loadAvatarGLTF, createAvatar, MANETTE_FICHIER } from './avatar.js';
 import { TVMenu } from './tvmenu.js';
 import { UISound } from './sound.js';
 import { createCinematicPass, createSanitizePass } from './effects.js';
@@ -227,13 +227,14 @@ async function main() {
     progress.avatar = e.total ? e.loaded / e.total : Math.min(0.95, e.loaded / 12e6);
     showProgress('Chargement de l\'avatar');
   };
-  const [loadedAvatar] = await Promise.all([
+  const [loadedAvatar, coqueManette] = await Promise.all([
     loadAvatarGLTF(loader, onAvatarProgress),
+    new Promise(res => loader.load(MANETTE_FICHIER, res, undefined, () => res(null))),   // coque de la manette
     loadOptionalAssets(room, renderer, manager, loader),
   ]);
   progress.avatar = progress.items = 1;
   showProgress('Installation dans le canapé');
-  avatar = createAvatar(loadedAvatar, scene, room.M, room);   // après le canapé : l'assise est détectée
+  avatar = createAvatar(loadedAvatar, scene, room.M, room, coqueManette);   // après le canapé : l'assise est détectée
   if (menu.section) avatar.setLightColor(menu.section.couleurs[0]);
   room.onEnvironment(env => avatar.setEnvironment(env));
 

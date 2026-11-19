@@ -164,9 +164,14 @@ La hauteur d'assise et la distance au dossier sont **détectées automatiquement
 | `jambes.piedsAvant`, `piedsEcart`, `genouxEcart` | position des pieds et ouverture des genoux (cuisses et genoux suivent automatiquement) |
 | `manette.avant`, `hauteur`, `inclinaison` | position et inclinaison de la manette (bras, mains et doigts viennent la saisir) |
 | `coudes.ecart`, `coudes.arriere` | coudes plus ou moins écartés du corps |
-| `prise.ecartPaume`, `versInterieur`, `versHaut`, `paumeHaut` | position des mains sur les poignées de la manette |
-| `prise.doigts`, `prise.index`, `prise.pouce` | doigts plus ou moins refermés (index sur les gâchettes, pouces sur les joysticks) |
-| `animation` | respiration, mouvements de tête, pouces, sursauts (mettre `0` ou `false` pour couper) |
+| `prise2.long`, `D`, `N`, `recul` | place des paumes sur les poignées et orientation des mains (réglés par optimisation : pouces au centre des joysticks, index sur les gâchettes, aucun doigt qui traverse la coque) |
+| `prise2.serrage` | doigts plus ou moins resserrés les uns contre les autres |
+| `prise2.rayonDoigt`, `rayonPouce` | épaisseur des doigts : les doigts se referment jusqu'à toucher la coque |
+| `animation` | respiration, mouvements de tête, jeu des pouces et des gâchettes, sursauts (mettre `0` ou `false` pour couper) |
+
+**La manette** (`js/manette.js`, forme dans `js/manette_forme.js`) est un design original : coque lisse générée à partir d'une forme mathématique (`assets/models/manette.glb`), joysticks qui s'inclinent sous les pouces, gâchettes qui s'enfoncent sous les index, anneau lumineux à la couleur de la section. Couleurs dans l'objet `MANETTE`. La même forme sert à poser chaque doigt exactement sur la surface.
+
+**Le rendu de la peau** (`RENDU_PEAU` dans `js/avatar.js`) : lumière diffusée sous la peau (ombres douces et chaudes), pores, léger film brillant, duvet, silhouettes arrondies (subdivision). **Les yeux** (`RENDU_YEUX`) : cornée qui accroche les reflets, clignements naturels, petits mouvements du regard.
 
 Si ton fichier GLB contient des animations, un menu **Animation** apparaît en haut à droite pour les essayer.
 Si l'avatar n'apparaît pas alors que `avatar.glb` est bien présent, ouvre la console du navigateur (F12) : la liste des os trouvés y est affichée.
